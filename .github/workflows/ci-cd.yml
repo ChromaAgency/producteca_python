@@ -47,6 +47,11 @@ jobs:
           git pull 
           git commit -am "Automated coverage report"
           git push 
+      - name: Run build
+        run: poetry run build
+        with:
+          name: python-package-distributions
+          path: dist/
   coverage:
     runs-on: ubuntu-latest
     needs: build 
