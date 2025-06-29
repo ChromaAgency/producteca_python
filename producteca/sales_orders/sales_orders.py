@@ -244,43 +244,59 @@ class SaleOrderService(BaseService[SaleOrder]):
         self._record = SaleOrder(**payload)
         return self
 
-    def get(self,  sale_order_id: int) -> "SaleOrder":
-        endpoint = f'salesorders/{sale_order_id}'
+    def get(self) -> "SaleOrder":
+        if not self._record:
+            raise Exception("You need to add a record id")
+        endpoint = f'salesorders/{self._record.id}'
         url = self.config.get_endpoint(endpoint)
         response = requests.get(url, headers=self.config.headers)
+        if not response.ok:
+            raise Exception("Order could not be fetched")
         return SaleOrder(**response.json())
 
-    def get_shipping_labels(self, sale_order_id: int):
-        endpoint = f'salesorders/{sale_order_id}/labels'
+    def get_shipping_labels(self):
+        if not self._record:
+            raise Exception("You need to add a record id")
+        endpoint = f'salesorders/{self._record.id}/labels'
         url = self.config.get_endpoint(endpoint)
         response = requests.get(url, headers=self.config.headers)
+        if not response.ok:
+            raise Exception("labels could not be gotten")
         return response.json()
 
     def close(self, sale_order_id: int):
-        endpoint = f'salesorders/{sale_order_id}/close'
+        if not self._record:
+            raise Exception("You need to add a record id")
+        endpoint = f'salesorders/{self._record.id}/close'
         url = self.config.get_endpoint(endpoint)
         response = requests.post(url, headers=self.config.headers)
-        return response.status_code, response.json()
+        if not response.ok:
+            raise Exception("Order could not be closed")
 
     def cancel(self, sale_order_id: int):
-        endpoint = f'salesorders/{sale_order_id}/cancel'
+        if not self._record:
+            raise Exception("You need to add a record id")
+        endpoint = f'salesorders/{self._record.id}/cancel'
         url = self.config.get_endpoint(endpoint)
         response = requests.post(url, headers=self.config.headers)
-        return response.status_code, response.json()
+        if not response.ok:
+            raise Exception("Order could not be closed")
 
-    def synchronize(self, payload: "SaleOrder") -> tuple[int, "SaleOrder"]:
+    def synchronize(self, payload: "SaleOrder") -> "SaleOrder":
         endpoint = 'salesorders/synchronize'
         url = self.config.get_endpoint(endpoint)
         response = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
-        return response.status_code, SaleOrder(**response.json())
+        if not response.ok:
+            raise Exception(f"Synchronize error {response.text}")
+        return SaleOrder(**response.json())
 
     def invoice_integration(self, sale_order_id: int, payload: "SaleOrder"):
         endpoint = f'salesorders/{sale_order_id}/invoiceIntegration'
         url = self.config.get_endpoint(endpoint)
         response = requests.put(url, headers=self.config.headers, data=payload.model_dump_json(exclude_none=True))
-        if response.status_code == 200:
-            return response.status_code, {}
-        return response.status_code, response.json()
+        if not response.ok:
+            raise Exception(f"Error on resposne {response.text}")
+        return SaleOrder(**response.json())
 
     def search(self, params: SearchSalesOrderParams):
         endpoint: str = f"search/{self.endpoint}"
@@ -298,19 +314,27 @@ class SaleOrderService(BaseService[SaleOrder]):
     def add_payment(self, sale_order_id: int, payload: "Payment") -> "Payment":
         url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/payments")
         res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        if not res.ok:
+            raise Exception(f"Error on resposne {res.text}")
         return Payment(**res.json())
 
     def update_payment(self, sale_order_id: int, payment_id: int, payload: "Payment") -> "Payment":
         url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/payments/{payment_id}")
         res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        if not res.ok:
+            raise Exception(f"Error on payment update {res.text}")
         return Payment(**res.json())
 
     def add_shipment(self, sale_order_id: int, payload: "Shipment") -> "Shipment":
         url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/shipments")
         res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        if not res.ok:
+            raise Exception(f"Error on shipment add {res.text}")
         return Shipment(**res.json())
 
     def update_shipment(self, sale_order_id: int, shipment_id: str, payload: "Shipment") -> "Shipment":
         url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/shipments/{shipment_id}")
         res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        if not res.ok:
+            raise Exception(f"Error on shipment update {res.text}")
         return Shipment(**res.json())
