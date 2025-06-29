@@ -145,5 +145,5 @@ class SearchProduct:
     def search_product(cls, config: ConfigProducteca, params: SearchProductParams) -> SearchProductResponse:
         headers = config.headers
         url = config.get_endpoint(cls.endpoint)
-        response = requests.get(url, headers=headers, params=params.dict(by_alias=True, exclude_none=True))
+        response = requests.get(url, headers=headers, params=params.model_dump(by_alias=True, exclude_none=True))
         return SearchProductResponse(**response.json())

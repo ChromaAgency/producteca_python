@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 import requests
-from ..config.config import ConfigProducteca
+from producteca.config.config import ConfigProducteca
 import logging
 
 _logger = logging.getLogger(__name__)

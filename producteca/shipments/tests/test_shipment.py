@@ -1,13 +1,14 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from .shipment import Shipment, ShipmentProduct, ShipmentMethod, ShipmentIntegration, ConfigProducteca
+from producteca.shipments.shipment import Shipment, ShipmentProduct, ShipmentMethod, ShipmentIntegration, ConfigProducteca
+
 
 class TestShipment(unittest.TestCase):
 
     @patch('requests.post')
     def test_create_shipment(self, mock_post):
         # Arrange
-        config = ConfigProducteca()
+        config = ConfigProducteca(token="test_token", api_key="as")
         sale_order_id = 123
         products = [ShipmentProduct(product=1, variation=2, quantity=3)]
         method = ShipmentMethod(trackingNumber="TN123", trackingUrl="http://track.url", courier="DHL", mode="air", cost=10.5, type="express", eta=5, status="shipped")
@@ -30,7 +31,7 @@ class TestShipment(unittest.TestCase):
     @patch('requests.put')
     def test_update_shipment(self, mock_put):
         # Arrange
-        config = ConfigProducteca()
+        config = ConfigProducteca(token="test_token", api_key="as")
         sale_order_id = 123
         shipment_id = 'abc'
         products = [ShipmentProduct(product=4, quantity=7)]
@@ -50,6 +51,7 @@ class TestShipment(unittest.TestCase):
         self.assertEqual(status_code, 200)
         self.assertEqual(response_json, {'updated': True})
         mock_put.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()
