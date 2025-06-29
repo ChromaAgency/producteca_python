@@ -12,7 +12,7 @@ test = 'scripts:test'
 main = 'logseek:main'
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.7"
 requests = "^2.32.3"
 coverage = "^7.6.3"
 pydantic = "^2.11.7"
