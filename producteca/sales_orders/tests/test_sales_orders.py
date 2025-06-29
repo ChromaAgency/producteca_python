@@ -34,20 +34,17 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: mock_labels
         )
 
-        labels = self.client.SalesOrder.get_shipping_labels(self.sale_order_id)
+        labels = self.client.SalesOrder(id=1234).get_shipping_labels()
         self.assertEqual(labels, mock_labels)
         mock_get.assert_called_once()
 
     @patch('requests.post')
     def test_close_sale_order(self, mock_post):
         mock_post.return_value = Mock(
-            status_code=200,
-            json=lambda: {"status": "closed"}
+            status_code=200
         )
 
-        status_code, response = self.client.SalesOrder.close(self.sale_order_id)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(response, {"status": "closed"})
+        self.client.SalesOrder(id=1234).close()
         mock_post.assert_called_once()
 
     @patch('requests.post')
@@ -57,9 +54,7 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: {"status": "cancelled"}
         )
 
-        status_code, response = self.client.SalesOrder.cancel(self.sale_order_id)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(response, {"status": "cancelled"})
+        self.client.SalesOrder(id=1234).cancel()
         mock_post.assert_called_once()
 
     @patch('requests.post')
@@ -70,8 +65,7 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: self.mock_response
         )
 
-        status_code, response = self.client.SalesOrder.synchronize(sale_order)
-        self.assertEqual(status_code, 200)
+        response = self.client.SalesOrder.synchronize(sale_order)
         self.assertEqual(response.id, self.sale_order_id)
         mock_post.assert_called_once()
 
@@ -87,12 +81,15 @@ class TestSaleOrder(unittest.TestCase):
 
         mock_put.return_value = Mock(
             status_code=200,
-            json=lambda: {}
+            json=lambda: {
+                "id": 1,
+                "integrationId": "test123",
+                "app": 1
+                }
         )
 
-        status_code, response = self.client.SalesOrder.invoice_integration(self.sale_order_id, sale_order)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(response, {})
+        response = self.client.SalesOrder(**sale_order.model_dump()).invoice_integration()
+        self.assertIsInstance(response, SaleOrder)
         mock_put.assert_called_once()
 
 

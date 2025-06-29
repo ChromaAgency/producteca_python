@@ -11,7 +11,6 @@ class TestShipment(unittest.TestCase):
     @patch('requests.post')
     def test_create_shipment(self, mock_post):
         # Arrange
-        sale_order_id = 123
         products = [ShipmentProduct(product=1, variation=2, quantity=3)]
         method = ShipmentMethod(trackingNumber="TN123", trackingUrl="http://track.url", courier="DHL", mode="air", cost=10.5, type="express", eta=5, status="shipped")
         integration = ShipmentIntegration(id=1, integrationId="int123", app=10, status="active")
@@ -22,7 +21,7 @@ class TestShipment(unittest.TestCase):
         mock_response.json.return_value = {'success': True}
         mock_post.return_value = mock_response
         # Act
-        shipment = self.client.SalesOrder.add_shipment(sale_order_id, payload)
+        shipment = self.client.SalesOrder(id=1234).add_shipment(payload)
 
         self.assertIsInstance(shipment, Shipment)
         mock_post.assert_called_once()
@@ -30,7 +29,6 @@ class TestShipment(unittest.TestCase):
     @patch('requests.put')
     def test_update_shipment(self, mock_put):
         # Arrange
-        sale_order_id = 123
         shipment_id = 'abc'
         products = [ShipmentProduct(product=4, quantity=7)]
         method = ShipmentMethod(courier="FedEx", cost=15.0)
@@ -42,7 +40,7 @@ class TestShipment(unittest.TestCase):
         mock_response.json.return_value = {'updated': True}
         mock_put.return_value = mock_response
 
-        shipment = self.client.SalesOrder.update_shipment(sale_order_id, shipment_id, payload)
+        shipment = self.client.SalesOrder(id=1234).update_shipment(shipment_id, payload)
 
         self.assertIsInstance(shipment, Shipment)
         mock_put.assert_called_once()

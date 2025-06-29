@@ -244,10 +244,8 @@ class SaleOrderService(BaseService[SaleOrder]):
         self._record = SaleOrder(**payload)
         return self
 
-    def get(self) -> "SaleOrder":
-        if not self._record:
-            raise Exception("You need to add a record id")
-        endpoint = f'salesorders/{self._record.id}'
+    def get(self, sale_order_id: int) -> "SaleOrder":
+        endpoint = f'{self.endpoint}/{sale_order_id}'
         url = self.config.get_endpoint(endpoint)
         response = requests.get(url, headers=self.config.headers)
         if not response.ok:
@@ -257,43 +255,45 @@ class SaleOrderService(BaseService[SaleOrder]):
     def get_shipping_labels(self):
         if not self._record:
             raise Exception("You need to add a record id")
-        endpoint = f'salesorders/{self._record.id}/labels'
+        endpoint = f'{self.endpoint}/{self._record.id}/labels'
         url = self.config.get_endpoint(endpoint)
         response = requests.get(url, headers=self.config.headers)
         if not response.ok:
             raise Exception("labels could not be gotten")
         return response.json()
 
-    def close(self, sale_order_id: int):
+    def close(self):
         if not self._record:
             raise Exception("You need to add a record id")
-        endpoint = f'salesorders/{self._record.id}/close'
+        endpoint = f'{self.endpoint}/{self._record.id}/close'
         url = self.config.get_endpoint(endpoint)
         response = requests.post(url, headers=self.config.headers)
         if not response.ok:
             raise Exception("Order could not be closed")
 
-    def cancel(self, sale_order_id: int):
+    def cancel(self):
         if not self._record:
             raise Exception("You need to add a record id")
-        endpoint = f'salesorders/{self._record.id}/cancel'
+        endpoint = f'{self.endpoint}/{self._record.id}/cancel'
         url = self.config.get_endpoint(endpoint)
         response = requests.post(url, headers=self.config.headers)
         if not response.ok:
             raise Exception("Order could not be closed")
 
     def synchronize(self, payload: "SaleOrder") -> "SaleOrder":
-        endpoint = 'salesorders/synchronize'
+        endpoint = f'{self.endpoint}/synchronize'
         url = self.config.get_endpoint(endpoint)
         response = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
         if not response.ok:
             raise Exception(f"Synchronize error {response.text}")
         return SaleOrder(**response.json())
 
-    def invoice_integration(self, sale_order_id: int, payload: "SaleOrder"):
-        endpoint = f'salesorders/{sale_order_id}/invoiceIntegration'
+    def invoice_integration(self):
+        if not self._record:
+            raise Exception("You need to add a record id")
+        endpoint = f'{self.endpoint}/{self._record.id}/invoiceIntegration'
         url = self.config.get_endpoint(endpoint)
-        response = requests.put(url, headers=self.config.headers, data=payload.model_dump_json(exclude_none=True))
+        response = requests.put(url, headers=self.config.headers, data=self._record.model_dump_json(exclude_none=True))
         if not response.ok:
             raise Exception(f"Error on resposne {response.text}")
         return SaleOrder(**response.json())
@@ -311,29 +311,37 @@ class SaleOrderService(BaseService[SaleOrder]):
             raise Exception(f"Error on resposne {response.text}")
         return SearchSalesOrder(**response.json())
 
-    def add_payment(self, sale_order_id: int, payload: "Payment") -> "Payment":
-        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/payments")
+    def add_payment(self, payload: "Payment") -> "Payment":
+        if not self._record:
+            raise Exception("You need to add a record id")
+        url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/payments")
         res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on resposne {res.text}")
         return Payment(**res.json())
 
-    def update_payment(self, sale_order_id: int, payment_id: int, payload: "Payment") -> "Payment":
-        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/payments/{payment_id}")
+    def update_payment(self, payment_id: int, payload: "Payment") -> "Payment":
+        if not self._record:
+            raise Exception("You need to add a record id")
+        url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/payments/{payment_id}")
         res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on payment update {res.text}")
         return Payment(**res.json())
 
-    def add_shipment(self, sale_order_id: int, payload: "Shipment") -> "Shipment":
-        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/shipments")
+    def add_shipment(self, payload: "Shipment") -> "Shipment":
+        if not self._record:
+            raise Exception("You need to add a record id")
+        url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/shipments")
         res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on shipment add {res.text}")
         return Shipment(**res.json())
 
-    def update_shipment(self, sale_order_id: int, shipment_id: str, payload: "Shipment") -> "Shipment":
-        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/shipments/{shipment_id}")
+    def update_shipment(self, shipment_id: str, payload: "Shipment") -> "Shipment":
+        if not self._record:
+            raise Exception("You need to add a record id")
+        url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/shipments/{shipment_id}")
         res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on shipment update {res.text}")

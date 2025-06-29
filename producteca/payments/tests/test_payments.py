@@ -35,7 +35,7 @@ class TestPayments(unittest.TestCase):
         payment = Payment(**self.payment_data)
         
         # Test create method
-        result = self.client.SalesOrder.add_payment(self.sale_order_id, payment)
+        result = self.client.SalesOrder(id=self.sale_order_id).add_payment(payment)
         
         # Assertions
         mock_post.assert_called_once()
@@ -55,7 +55,7 @@ class TestPayments(unittest.TestCase):
         payment = Payment(**self.payment_data)
         
         # Test update method
-        result = self.client.SalesOrder.update_payment(self.sale_order_id, self.payment_id, payment)
+        result = self.client.SalesOrder(id=self.sale_order_id).update_payment(self.payment_id, payment)
         
         # Assertions
         mock_put.assert_called_once()
