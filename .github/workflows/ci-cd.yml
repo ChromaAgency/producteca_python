@@ -1,15 +1,12 @@
 name: CI/CD
 on: 
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
-  release:
-    types: [created]
+  push:
     branches:
       - main
+
 jobs:
   build:
     strategy:
@@ -31,27 +28,30 @@ jobs:
       - name: Install deps
         run: poetry install
       - name: Ferch repo
-        # ${{github.event.pull_request.head.ref}}
         run: |
           git status
           git config --global user.name 'Git bot'
           git config --global user.email 'gitbot@users.noreply.github.com'
           git fetch origin
-          git checkout origin/main
+          git checkout --track origin/${{github.event.pull_request.head.ref}}
           git pull 
       - name: Bump version
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           poetry version patch
           VERSION=$(poetry version -s)
+      - name: Push changes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          git status
+          git commit -am "Version Bump"
+          git push 
       - name: Run tests
         run: poetry run test
       - name: Run coverage report
-        run: poetry run get_coverage
-      - name: Ferch repo
         run: |
-          git commit -am "Automated coverage report"
-          git push 
+          poetry run get_coverage
+          git status
       - name: Run build
         run: poetry build
       - name: Store the distribution packages
@@ -59,16 +59,28 @@ jobs:
         with:
           name: python-package-distributions
           path: dist/
+      - name: Store the coverage xml
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
   coverage:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build 
     steps:
+      - name: Download coverage.xml
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
       - uses: qltysh/qlty-action/coverage@v1
         with:
           token: ${{secrets.QLTY_COVERAGE_TOKEN}}
-          files: ${{github.workspace}}/coverage.xml:coverage.py
+          files: coverage.xml
             
   publish-to-pypi:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: >-
       Publish Python 🐍 distribution 📦 to PyPI
     needs:
