@@ -58,12 +58,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: build 
     steps:
-      - uses: actions/checkout@v4
-      - uses: paambaati/codeclimate-action@v9.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-        with: 
-          coverageLocations: ${{github.workspace}}/coverage.xml:coverage.py
+      - uses: qltysh/qlty-action/coverage@v1
+  with:
+    token: {{secrets.QLTY_COVERAGE_TOKEN}}
+    files: .coverage
       
     # name: Build distribution 📦
     # runs-on: ubuntu-latest
