@@ -13,6 +13,33 @@ class TestProduct(unittest.TestCase):
             code="TEST001",
             category="Test"
         )
+        self.product_to_create_payload = {
+            "sku": "9817234",
+            "code": "871234",
+            "name": "Hola test",
+            "buyingPrice": 0,
+            "deals": [
+                {
+                "campaign": "string",
+                "regularPrice": 0,
+                "dealPrice": 0
+                }
+            ],
+                "prices": [
+                {
+                "amount": 10,
+                "currency": "Local",
+                "priceList": "Default"
+                }
+            ],
+                "stocks": [
+                    {
+                    "quantity": 2,
+                    "availableQuantity": 2,
+                    "warehouse": "Default"
+                    }
+                ],
+            }
 
     @patch('requests.post')
     def test_create_product_success(self, mock_post):
@@ -22,7 +49,7 @@ class TestProduct(unittest.TestCase):
         mock_response.json.return_value = self.test_product.model_dump()
         mock_post.return_value = mock_response
 
-        response = self.client.Product(**self.test_product.model_dump()).create()
+        response = self.client.Product(**self.test_product.model_dump()).synchronize(self.product_to_create_payload)
         
         self.assertEqual(response.sku, "TEST001")
 
@@ -34,17 +61,17 @@ class TestProduct(unittest.TestCase):
         mock_post.return_value = mock_response
 
         with self.assertRaises(Exception):
-            self.client.Product.create()
+            self.client.Product.synchronize(self.product_to_create_payload)
 
     @patch('requests.post')
     def test_update_product_success(self, mock_post):
-        # Mock successful update
+        payload = self.product_to_create_payload
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = self.test_product.model_dump()
         mock_post.return_value = mock_response
 
-        response = self.client.Product(**self.test_product.model_dump()).update()
+        response = self.client.Product(**self.test_product.model_dump()).synchronize(payload)
         
         self.assertEqual(response.name, "Test Product")
 
@@ -65,28 +92,86 @@ class TestProduct(unittest.TestCase):
         # Mock get bundle response
         mock_response = Mock()
         mock_response.status_code = 200
-        test_prod = self.test_product.model_dump()
-        test_prod.update({"sku": "TEST001", "bundles": []})
+        test_prod = {
+                "results": [
+                    {
+                    "companyId": 0,
+                    "productId": 0,
+                    "variations": [
+                        {
+                        "variationId": 0,
+                        "components": [
+                            {
+                            "quantity": 0,
+                            "variationId": 0,
+                            "productId": 0
+                            }
+                        ]
+                        }
+                    ],
+                    "id": "string"
+                    }
+                ],
+                "count": 0
+                }
         mock_response.json.return_value = test_prod
         mock_get.return_value = mock_response
 
         product = self.client.Product.get_bundle(1)
         
-        self.assertEqual(product.sku, "TEST001")
+        self.assertEqual(product.count, 0)
 
     @patch('requests.get')
     def test_get_ml_integration(self, mock_get):
         # Mock ML integration response
         mock_response = Mock()
         mock_response.status_code = 200
-        test_prod = self.test_product.model_dump()
-        test_prod.update({"sku": "TEST001", "integrations": []})
-        mock_response.json.return_value = test_prod
+        meli_product = {
+            "hasCustomShippingCosts": True,
+            "productId": 0,
+            "shipping": {
+                "localPickup": True,
+                "mode": "string",
+                "freeShipping": True,
+                "freeShippingCost": 0,
+                "mandatoryFreeShipping": True,
+                "freeShippingMethod": "string"
+            },
+            "mShopsShipping": {
+                "enabled": True
+            },
+            "addFreeShippingCostToPrice": True,
+            "category": {
+                "meliId": "string",
+                "acceptsMercadoenvios": True,
+                "suggest": True,
+                "fixed": True
+            },
+            "attributeCompletion": {
+                "productIdentifierStatus": "Complete",
+                "dataSheetStatus": "Complete",
+                "status": "Complete",
+                "count": 0,
+                "total": 0
+            },
+            "catalogProducts": [
+                "string"
+            ],
+            "warranty": "string",
+            "domain": "string",
+            "listingTypeId": "GoldSpecial",
+            "catalogProductsStatus": "Unlinked",
+            "tags": [
+                "string"
+            ]
+            }
+        
+        mock_response.json.return_value = meli_product
         mock_get.return_value = mock_response
 
         product = self.client.Product.get_ml_integration(1)
         
-        self.assertEqual(product.sku, "TEST001")
+        self.assertEqual(product.listing_type_id, "GoldSpecial")
 
 
 if __name__ == '__main__':
