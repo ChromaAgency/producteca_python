@@ -3,14 +3,14 @@ name: CI/CD
 on: 
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
   release:
     types: [created]
     branches:
-      - master
+      - main
 jobs:
   build:
     name: Build distribution 📦
