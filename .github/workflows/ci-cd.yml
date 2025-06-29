@@ -30,6 +30,14 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
       - name: Install deps
         run: poetry install
+      - name: Ferch repo
+        run: |
+          git status
+          git config --global user.name 'Git bot'
+          git config --global user.email 'gitbot@users.noreply.github.com'
+          git fetch origin
+          git checkout --track origin/${{github.event.pull_request.head.ref}}
+          git pull 
       - name: Bump version
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
@@ -39,16 +47,8 @@ jobs:
         run: poetry run test
       - name: Run coverage report
         run: poetry run get_coverage
-      - name: Commit report
-        continue-on-error: true
+      - name: Ferch repo
         run: |
-          git status
-          git config --global user.name 'Git bot'
-          git config --global user.email 'gitbot@users.noreply.github.com'
-          git fetch origin
-          git checkout --track origin/${{github.event.pull_request.head.ref}}
-          git pull 
-          git add -A
           git commit -am "Automated coverage report"
           git push 
       - name: Run build
