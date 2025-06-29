@@ -36,12 +36,12 @@ jobs:
           git checkout --track origin/${{github.event.pull_request.head.ref}}
           git pull 
       - name: Bump version
-        if: ${{ github.event_name == 'push' }} && ${{ github.ref == 'refs/heads/main' }}
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           poetry version patch
           VERSION=$(poetry version -s)
       - name: Push changes
-        if: ${{ github.event_name == 'push' }} && ${{ github.ref == 'refs/heads/main' }}
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git status
           git commit -am "Version Bump"
@@ -66,7 +66,7 @@ jobs:
           path: coverage.xml
   coverage:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' }} && ${{ github.ref == 'refs/heads/main' }}
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build 
     steps:
       - name: Download coverage.xml
@@ -80,6 +80,7 @@ jobs:
           files: coverage.xml
             
   publish-to-pypi:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: >-
       Publish Python 🐍 distribution 📦 to PyPI
     needs:
