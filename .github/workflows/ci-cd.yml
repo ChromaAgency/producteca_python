@@ -27,13 +27,11 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
       - name: Install deps
         run: poetry install
-      - name: Ferch repo
+      - name: Fetch repo
         run: |
           git status
           git config --global user.name 'Git bot'
           git config --global user.email 'gitbot@users.noreply.github.com'
-          git fetch origin
-          git checkout --track origin/${{github.event.pull_request.head.ref}}
           git pull 
       - name: Bump version
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -69,6 +67,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: build 
     steps:
+      - uses: actions/checkout@v4
       - name: Download coverage.xml
         uses: actions/download-artifact@v4
         with:
@@ -77,7 +76,7 @@ jobs:
       - uses: qltysh/qlty-action/coverage@v1
         with:
           token: ${{secrets.QLTY_COVERAGE_TOKEN}}
-          files: coverage.xml
+          files: coverage.xml/coverage.xml
             
   publish-to-pypi:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
