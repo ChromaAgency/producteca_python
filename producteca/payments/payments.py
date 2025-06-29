@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 import requests
-from ..config.config import ConfigProducteca
+from producteca.abstract.abstract_dataclass import BaseService
 
 
 class PaymentCard(BaseModel):
@@ -32,14 +32,15 @@ class Payment(BaseModel):
     hasCancelableStatus: bool
     id: Optional[int] = None
 
-    @classmethod
-    def create(cls, config: ConfigProducteca, sale_order_id: int, payload: "Payment") -> "Payment":
-        url = config.get_endpoint(f"salesorders/{sale_order_id}/payments")
-        res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=config.headers)
-        return cls(**res.json())
 
-    @classmethod
-    def update(cls, config: ConfigProducteca, sale_order_id: int, payment_id: int, payload: "Payment") -> "Payment":
-        url = config.get_endpoint(f"salesorders/{sale_order_id}/payments/{payment_id}")
-        res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=config.headers)
-        return cls(**res.json())
+class PaymentService(BaseService):
+
+    def create(self, sale_order_id: int, payload: "Payment") -> "Payment":
+        url = self.config.get_endpoint(f"salesorders/{sale_order_id}/payments")
+        res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        return Payment(**res.json())
+
+    def update(self, sale_order_id: int, payment_id: int, payload: "Payment") -> "Payment":
+        url = self.config.get_endpoint(f"salesorders/{sale_order_id}/payments/{payment_id}")
+        res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        return Payment(**res.json())

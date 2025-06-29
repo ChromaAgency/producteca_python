@@ -1,19 +1,21 @@
 from typing import List, Optional, Union
 from pydantic import BaseModel, Field
-import requests
-from ..config.config import ConfigProducteca
+from dataclasses import dataclass
+from producteca.abstract.abstract_dataclass import BaseService
 import logging
+import requests
 
 _logger = logging.getLogger(__name__)
 
-# Models for nested structures
 
 class Attribute(BaseModel):
     key: str
     value: str
 
+
 class Tag(BaseModel):
     tag: str
+
 
 class Dimensions(BaseModel):
     weight: Optional[float] = None
@@ -22,10 +24,12 @@ class Dimensions(BaseModel):
     length: Optional[float] = None
     pieces: Optional[int] = None
 
+
 class Deal(BaseModel):
     campaign: str
     regular_price: Optional[float] = Field(default=None, alias='regularPrice')
     deal_price: Optional[float] = Field(default=None, alias='dealPrice')
+
 
 class Stock(BaseModel):
     quantity: Optional[int] = None
@@ -35,14 +39,17 @@ class Stock(BaseModel):
     reserved: Optional[int] = None
     available: Optional[int] = None
 
+
 class Price(BaseModel):
     amount: Optional[float] = None
     currency: str
     price_list: str = Field(alias='priceList')
     price_list_id: Optional[int] = Field(default=None, alias='priceListId')
 
+
 class Picture(BaseModel):
     url: str
+
 
 class Integration(BaseModel):
     app: Optional[int] = None
@@ -56,6 +63,7 @@ class Integration(BaseModel):
     is_active_or_paused: Optional[bool] = Field(default=None, alias='isActiveOrPaused')
     id: Optional[int] = None
     parent_integration: Optional[str] = Field(default=None, alias='parentIntegration')
+
 
 class Variation(BaseModel):
     variation_id: Optional[int] = Field(default=None, alias='variationId')
@@ -71,11 +79,15 @@ class Variation(BaseModel):
     sku: Optional[str] = None
     barcode: Optional[str] = None
 
-# Model base para los productos
+
+class MeliCategory(BaseModel):
+    meli_id: Optional[str] = Field(default=None, alias='meliId')
+    accepts_mercadoenvios: Optional[bool] = Field(default=None, alias='acceptsMercadoenvios')
+    suggest: Optional[bool] = None
+    fixed: Optional[bool] = None
+
+
 class Product(BaseModel):
-    config: Optional[ConfigProducteca] = Field(default=None, exclude=True)
-    endpoint: str = Field(default='products', exclude=True)
-    create_if_it_doesnt_exist: bool = Field(default=False, exclude=True)
     sku: Optional[str] = None
     variation_id: Optional[int] = None
     code: Optional[str] = None
@@ -85,7 +97,7 @@ class Product(BaseModel):
     tags: Optional[List[str]] = None
     buying_price: Optional[float] = None
     dimensions: Optional[Dimensions] = None
-    category: Optional[Union[str, dict]] = None  # Puede ser string en POST o dict en GET Meli
+    category: Optional[Union[str, MeliCategory]]
     brand: Optional[str] = None
     notes: Optional[str] = None
     deals: Optional[List[Deal]] = None
@@ -93,60 +105,6 @@ class Product(BaseModel):
     prices: Optional[List[Price]] = None
     pictures: Optional[List[Picture]] = None
 
-
-    def create(self):
-        endpoint_url = self.config.get_endpoint(f'{self.endpoint}/synchronize')
-        headers = self.config.headers.copy()
-        headers.update({"createifitdoesntexist": str(self.create_if_it_doesnt_exist).lower()})
-        data = self.model_dump_json(by_alias=True, exclude_none=True)
-        response = requests.post(endpoint_url, data=data, headers=headers)
-        if response.status_code == 204:
-            final_response = {"Message":"Product does not exist and the request cant create if it does not exist"}
-        else:
-            final_response = response.json()
-        return final_response, response.status_code
-
-    def update(self):
-        endpoint_url = self.config.get_endpoint(f'{self.endpoint}/synchronize')
-        headers = self.config.headers.copy()
-        data = self.model_dump_json(by_alias=True, exclude_none=True)
-        if not self.code and not self.sku:
-            return {"Message":"Sku or code should be provided to update the product"}, 204
-        response = requests.post(endpoint_url, data=data, headers=headers)
-        if response.status_code == 204:
-            final_response = {"Message":"Product does not exist and the request cant create if it does not exist"}
-        else:
-            final_response = response.json()
-        return final_response, response.status_code
-
-    @classmethod
-    def get(cls, config: ConfigProducteca, product_id: int):
-        endpoint_url = config.get_endpoint(f'{cls().endpoint}/{product_id}')
-        headers = config.headers
-        response = requests.get(endpoint_url, headers=headers)
-        response_data = response.json()
-        return response_data, response.status_code
-
-    @classmethod
-    def get_bundle(cls, config: ConfigProducteca, product_id: int):
-        endpoint_url = config.get_endpoint(f'{cls().endpoint}/{product_id}/bundles')
-        headers = config.headers
-        response = requests.get(endpoint_url, headers=headers)
-        return cls(config=config, **response.json()), response.status_code
-
-    @classmethod
-    def get_ml_integration(cls, config: ConfigProducteca, product_id: int):
-        endpoint_url = config.get_endpoint(f'{cls().endpoint}/{product_id}/listintegration')
-        headers = config.headers
-        response = requests.get(endpoint_url, headers=headers)
-        return cls(config=config, **response.json()), response.status_code
-
-# Modelo con campos extra de la vista Meli
-class MeliCategory(BaseModel):
-    meli_id: Optional[str] = Field(default=None, alias='meliId')
-    accepts_mercadoenvios: Optional[bool] = Field(default=None, alias='acceptsMercadoenvios')
-    suggest: Optional[bool] = None
-    fixed: Optional[bool] = None
 
 class Shipping(BaseModel):
     local_pickup: Optional[bool] = Field(default=None, alias='localPickup')
@@ -156,8 +114,10 @@ class Shipping(BaseModel):
     mandatory_free_shipping: Optional[bool] = Field(default=None, alias='mandatoryFreeShipping')
     free_shipping_method: Optional[str] = Field(default=None, alias='freeShippingMethod')
 
+
 class MShopsShipping(BaseModel):
     enabled: Optional[bool] = None
+
 
 class AttributeCompletion(BaseModel):
     product_identifier_status: Optional[str] = Field(default=None, alias='productIdentifierStatus')
@@ -166,13 +126,14 @@ class AttributeCompletion(BaseModel):
     count: Optional[int] = None
     total: Optional[int] = None
 
+
 class MeliProduct(Product):
     product_id: Optional[int] = Field(default=None, alias='productId')
     has_custom_shipping_costs: Optional[bool] = Field(default=None, alias='hasCustomShippingCosts')
     shipping: Optional[Shipping] = None
     mshops_shipping: Optional[MShopsShipping] = Field(default=None, alias='mShopsShipping')
     add_free_shipping_cost_to_price: Optional[bool] = Field(default=None, alias='addFreeShippingCostToPrice')
-    category: Optional[MeliCategory] = None
+    category: Optional[Union[str, MeliCategory]]  # will never be str, but needs compat with super class
     attribute_completion: Optional[AttributeCompletion] = Field(default=None, alias='attributeCompletion')
     catalog_products: Optional[List[str]] = Field(default=None, alias='catalogProducts')
     warranty: Optional[str] = None
@@ -180,3 +141,55 @@ class MeliProduct(Product):
     listing_type_id: Optional[str] = Field(default=None, alias='listingTypeId')
     catalog_products_status: Optional[str] = Field(default=None, alias='catalogProductsStatus')
 
+
+@dataclass
+class ProductService(BaseService):
+    endpoint: str = Field(default='products', exclude=True)
+    create_if_it_doesnt_exist: bool = Field(default=False, exclude=True)
+
+    def create(self):
+        endpoint_url = self.config.get_endpoint(f'{self.endpoint}/synchronize')
+        headers = self.config.headers.copy()
+        headers.update({"createifitdoesntexist": str(self.create_if_it_doesnt_exist).lower()})
+        data = self.model_dump_json(by_alias=True, exclude_none=True)
+        response = requests.post(endpoint_url, data=data, headers=headers)
+        if response.status_code == 204:
+            raise Exception("Product does not exist and the request cant create if it does not exist")
+        return Product(**response.json())
+
+    def update(self):
+        # TODO: Change name to synchronize
+        endpoint_url = self.config.get_endpoint(f'{self.endpoint}/synchronize')
+        headers = self.config.headers.copy()
+        data = self.model_dump_json(by_alias=True, exclude_none=True)
+        if not self.code and not self.sku:
+            raise "Sku or code should be provided to update the product"
+        response = requests.post(endpoint_url, data=data, headers=headers)
+        if response.status_code == 204:
+            raise Exception("Product does not exist and the request cant create if it does not exist")
+        return Product(**response.json())
+
+    def get(self, product_id: int) -> "Product":
+        endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}')
+        headers = self.config.headers
+        response = requests.get(endpoint_url, headers=headers)
+        if not response.ok:
+            raise Exception(f"Error getting product {product_id}\n {response.text}")
+        response_data = response.json()
+        return Product(**response_data)
+
+    def get_bundle(self, product_id: int) -> "Product":
+        endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}/bundles')
+        headers = self.config.headers
+        response = requests.get(endpoint_url, headers=headers)
+        if not response.ok:
+            raise Exception(f"Error getting bundle {product_id}\n {response.text}")
+        return Product(**response.json())
+
+    def get_ml_integration(self, product_id: int) -> "MeliProduct":
+        endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}/listingintegration')
+        headers = self.config.headers
+        response = requests.get(endpoint_url, headers=headers)
+        if not response.ok:
+            raise Exception(f"Error getting ml integration {product_id}\n {response.text}")
+        return MeliProduct(**response.json())

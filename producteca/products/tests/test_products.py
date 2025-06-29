@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock
 from producteca.config.config import ConfigProducteca
-from producteca.products.products import Product, MeliProduct
+from producteca.products.products import Product
 
 
 class TestProduct(unittest.TestCase):
@@ -90,6 +90,7 @@ class TestProduct(unittest.TestCase):
         
         self.assertEqual(status_code, 200)
         self.assertEqual(product.sku, "TEST001")
+
 
 if __name__ == '__main__':
     unittest.main()

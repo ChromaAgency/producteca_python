@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 from datetime import datetime
 from producteca.config.config import ConfigProducteca
-from producteca.payments.payments import Payment, PaymentCard, PaymentIntegration
+from producteca.payments.payments import Payment
 
 
 class TestPayments(unittest.TestCase):

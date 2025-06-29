@@ -149,12 +149,13 @@ class SearchSalesOrderParams(BaseModel):
     top: Optional[int]
     skip: Optional[int]
     filter: Optional[str] = Field(default=None, alias="$filter")
+    
     class Config:
         validate_by_name = True
 
+
 class SearchSalesOrder:
     endpoint: str = "search/salesorders"
-
 
     @classmethod
     def search_saleorder(cls, config: ConfigProducteca, params: SearchSalesOrderParams):

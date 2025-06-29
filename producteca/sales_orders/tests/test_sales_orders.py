@@ -94,5 +94,6 @@ class TestSaleOrder(unittest.TestCase):
         self.assertEqual(response, {})
         mock_put.assert_called_once()
 
+
 if __name__ == '__main__':
     unittest.main()

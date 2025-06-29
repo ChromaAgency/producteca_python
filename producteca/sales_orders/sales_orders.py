@@ -1,9 +1,11 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import List, Optional
 import requests
-from ..config.config import ConfigProducteca
+from producteca.abstract.abstract_dataclass import BaseService
+from dataclasses import dataclass
 import logging
 _logger = logging.getLogger(__name__)
+
 
 class SaleOrderLocation(BaseModel):
     streetName: Optional[str] = None
@@ -13,6 +15,7 @@ class SaleOrderLocation(BaseModel):
     city: Optional[str] = None
     neighborhood: Optional[str] = None
     zipCode: Optional[str] = None
+
 
 class SaleOrderBillingInfo(BaseModel):
     docType: Optional[str] = None
@@ -29,10 +32,12 @@ class SaleOrderBillingInfo(BaseModel):
     lastName: Optional[str] = None
     businessName: Optional[str] = None
 
+
 class SaleOrderProfile(BaseModel):
     app: int
     integrationId: str
     nickname: Optional[str] = None
+
 
 class SaleOrderContact(BaseModel):
     id: int
@@ -49,14 +54,17 @@ class SaleOrderContact(BaseModel):
     profile: Optional[SaleOrderProfile] = None
     billingInfo: Optional[SaleOrderBillingInfo] = None
 
+
 class SaleOrderIntegrationId(BaseModel):
     alternateId: Optional[str] = None
     integrationId: str
     app: int
 
+
 class SaleOrderVariationPicture(BaseModel):
     url: str
     id: Optional[int] = None
+
 
 class SaleOrderVariationStock(BaseModel):
     warehouseId: Optional[int] = None
@@ -66,9 +74,11 @@ class SaleOrderVariationStock(BaseModel):
     lastModified: Optional[str] = None
     available: int
 
+
 class SaleOrderVariationAttribute(BaseModel):
     key: str
     value: str
+
 
 class SaleOrderVariation(BaseModel):
     supplierCode: Optional[str] = None
@@ -86,14 +96,17 @@ class SaleOrderVariation(BaseModel):
     sku: str
     barcode: Optional[str] = None
 
+
 class SaleOrderProduct(BaseModel):
     name: str
     code: str
     brand: Optional[str] = None
     id: int
 
+
 class SaleOrderConversation(BaseModel):
     questions: Optional[List[str]] = None
+
 
 class SaleOrderLine(BaseModel):
     price: float
@@ -107,6 +120,7 @@ class SaleOrderLine(BaseModel):
     reserved: Optional[int] = None
     id: int
 
+
 class SaleOrderCard(BaseModel):
     paymentNetwork: Optional[str] = None
     firstSixDigits: Optional[int] = None
@@ -115,9 +129,11 @@ class SaleOrderCard(BaseModel):
     cardholderIdentificationType: Optional[str] = None
     cardholderName: Optional[str] = None
 
+
 class SaleOrderPaymentIntegration(BaseModel):
     integrationId: str
     app: int
+
 
 class SaleOrderPayment(BaseModel):
     date: Optional[str] = None
@@ -134,6 +150,7 @@ class SaleOrderPayment(BaseModel):
     hasCancelableStatus: Optional[bool] = None
     id: Optional[int] = None
 
+
 class SaleOrderShipmentMethod(BaseModel):
     trackingNumber: Optional[str] = None
     trackingUrl: Optional[str] = None
@@ -144,16 +161,19 @@ class SaleOrderShipmentMethod(BaseModel):
     eta: Optional[int] = None
     status: Optional[str] = None
 
+
 class SaleOrderShipmentProduct(BaseModel):
     product: int
     variation: int
     quantity: int
+
 
 class SaleOrderShipmentIntegration(BaseModel):
     app: int
     integrationId: str
     status: str
     id: int
+
 
 class SaleOrderShipment(BaseModel):
     date: str
@@ -163,6 +183,7 @@ class SaleOrderShipment(BaseModel):
     receiver: Optional[dict] = None
     id: int
 
+
 class SaleOrderInvoiceIntegration(BaseModel):
     id: Optional[int] = None
     integrationId: Optional[str] = None
@@ -171,6 +192,7 @@ class SaleOrderInvoiceIntegration(BaseModel):
     documentUrl: Optional[str] = None
     xmlUrl: Optional[str] = None
     decreaseStock: Optional[bool] = None
+
 
 class SaleOrder(BaseModel):
     tags: Optional[List[str]] = None
@@ -210,46 +232,44 @@ class SaleOrder(BaseModel):
     notes: Optional[str] = None
     id: int
 
-    @classmethod
-    def get(cls, config: ConfigProducteca, sale_order_id: int) -> "SaleOrder":
-        endpoint = f'salesorders/{sale_order_id}'
-        url = config.get_endpoint(endpoint)
-        response = requests.get(url, headers=config.headers)
-        return cls(**response.json())
 
-    @classmethod
-    def get_shipping_labels(cls, config: ConfigProducteca, sale_order_id: int):
+@dataclass
+class SaleOrderService(BaseService):
+
+    def get(self,  sale_order_id: int) -> "SaleOrder":
+        endpoint = f'salesorders/{sale_order_id}'
+        url = self.config.get_endpoint(endpoint)
+        response = requests.get(url, headers=self.config.headers)
+        return SaleOrder(**response.json())
+
+    def get_shipping_labels(self, sale_order_id: int):
         endpoint = f'salesorders/{sale_order_id}/labels'
-        url = config.get_endpoint(endpoint)
-        response = requests.get(url, headers=config.headers)
+        url = self.config.get_endpoint(endpoint)
+        response = requests.get(url, headers=self.config.headers)
         return response.json()
 
-    @classmethod
-    def close(cls, config: ConfigProducteca, sale_order_id: int):
+    def close(self, sale_order_id: int):
         endpoint = f'salesorders/{sale_order_id}/close'
-        url = config.get_endpoint(endpoint)
-        response = requests.post(url, headers=config.headers)
+        url = self.config.get_endpoint(endpoint)
+        response = requests.post(url, headers=self.config.headers)
         return response.status_code, response.json()
 
-    @classmethod
-    def cancel(cls, config: ConfigProducteca, sale_order_id: int):
+    def cancel(self, sale_order_id: int):
         endpoint = f'salesorders/{sale_order_id}/cancel'
-        url = config.get_endpoint(endpoint)
-        response = requests.post(url, headers=config.headers)
+        url = self.config.get_endpoint(endpoint)
+        response = requests.post(url, headers=self.config.headers)
         return response.status_code, response.json()
 
-    @classmethod
-    def synchronize(cls, config: ConfigProducteca, payload: "SaleOrder") -> tuple[int, "SaleOrder"]:
+    def synchronize(self, payload: "SaleOrder") -> tuple[int, "SaleOrder"]:
         endpoint = 'salesorders/synchronize'
-        url = config.get_endpoint(endpoint)
-        response = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=config.headers)
-        return response.status_code, cls(**response.json())
+        url = self.config.get_endpoint(endpoint)
+        response = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        return response.status_code, SaleOrder(**response.json())
 
-    @classmethod
-    def invoice_integration(cls, config: ConfigProducteca, sale_order_id: int, payload: "SaleOrder"):
+    def invoice_integration(self, sale_order_id: int, payload: "SaleOrder"):
         endpoint = f'salesorders/{sale_order_id}/invoiceIntegration'
-        url = config.get_endpoint(endpoint)
-        response = requests.put(url, headers=config.headers, data=payload.model_dump_json(exclude_none=True))
+        url = self.config.get_endpoint(endpoint)
+        response = requests.put(url, headers=self.config.headers, data=payload.model_dump_json(exclude_none=True))
         if response.status_code == 200:
             return response.status_code, {}
         return response.status_code, response.json()

@@ -1,9 +1,8 @@
 from producteca.config.config import ConfigProducteca
-from producteca.products.products import Product
-from producteca.sales_orders.sales_orders import SalesOrder
-from producteca.search.search import Search
-from producteca.shipments.shipment import Shipment
-from producteca.payments.payments import Payment
+from producteca.products.products import ProductService
+from producteca.sales_orders.sales_orders import SaleOrderService
+from producteca.shipments.shipment import ShipmentService
+from producteca.payments.payments import PaymentService
 import os
 
 
@@ -15,23 +14,19 @@ class ProductecaClient:
         if not api_key:
             raise ValueError('PRODUCTECA_API_KEY environment variable not set')
         self.config = ConfigProducteca(token=token, api_key=api_key)
-        
+
     @property
     def Product(self):
-        return lambda *args: Product(config=self.config, *args)
-
-    @property 
-    def SalesOrder(self):
-        return lambda *args: SalesOrder(config=self.config, *args)
+        return ProductService(self.config)
 
     @property
-    def Search(self):
-        return lambda *args: Search(config=self.config, *args)
+    def SalesOrder(self):
+        return SaleOrderService(self.config)
 
     @property
     def Shipment(self):
-        return lambda *args: Shipment(config=self.config, *args)
+        return ShipmentService(self.config)
 
     @property
     def Payment(self):
-        return lambda *args: Payment(config=self.config, *args)
+        return PaymentService(self.config)

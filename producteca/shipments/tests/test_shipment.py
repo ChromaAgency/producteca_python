@@ -1,14 +1,17 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from producteca.shipments.shipment import Shipment, ShipmentProduct, ShipmentMethod, ShipmentIntegration, ConfigProducteca
+from producteca.client import ProductecaClient
 
 
 class TestShipment(unittest.TestCase):
-
+    def setUp(self):
+        config = ConfigProducteca(token="test_id", api_key="test_secret")
+        self.client = ProductecaClient(config)
+        
     @patch('requests.post')
     def test_create_shipment(self, mock_post):
         # Arrange
-        config = ConfigProducteca(token="test_token", api_key="as")
         sale_order_id = 123
         products = [ShipmentProduct(product=1, variation=2, quantity=3)]
         method = ShipmentMethod(trackingNumber="TN123", trackingUrl="http://track.url", courier="DHL", mode="air", cost=10.5, type="express", eta=5, status="shipped")
@@ -19,9 +22,8 @@ class TestShipment(unittest.TestCase):
         mock_response.status_code = 201
         mock_response.json.return_value = {'success': True}
         mock_post.return_value = mock_response
-
         # Act
-        status_code, response_json = Shipment.create(config, sale_order_id, payload)
+        status_code, response_json = self.client.Shipment.create(sale_order_id, payload)
 
         # Assert
         self.assertEqual(status_code, 201)
