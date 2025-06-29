@@ -35,7 +35,15 @@ class TestPayments(unittest.TestCase):
         payment = Payment(**self.payment_data)
         
         # Test create method
-        result = self.client.SalesOrder(id=self.sale_order_id).add_payment(payment)
+        result = self.client.SalesOrder(id=self.sale_order_id, invoiceIntegration={
+                'id': 1,
+                'integrationId': 'test-integration',
+                'app': 1,
+                'createdAt': '2023-01-01',
+                'decreaseStock': True,
+                "documentUrl": "https://aallala.copm",
+                "xmlUrl": "https://aallala.copm",
+            }).add_payment(payment.model_dump(by_alias=True))
         
         # Assertions
         mock_post.assert_called_once()
@@ -55,7 +63,15 @@ class TestPayments(unittest.TestCase):
         payment = Payment(**self.payment_data)
         
         # Test update method
-        result = self.client.SalesOrder(id=self.sale_order_id).update_payment(self.payment_id, payment)
+        result = self.client.SalesOrder(id=self.sale_order_id, invoiceIntegration={
+                'id': 1,
+                'integrationId': 'test-integration',
+                'app': 1,
+                'createdAt': '2023-01-01',
+                'decreaseStock': True,
+                "documentUrl": "https://aallala.copm",
+                "xmlUrl": "https://aallala.copm",
+            }).update_payment(self.payment_id, payment.model_dump(by_alias=True))
         
         # Assertions
         mock_put.assert_called_once()

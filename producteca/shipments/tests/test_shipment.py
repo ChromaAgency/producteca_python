@@ -14,14 +14,20 @@ class TestShipment(unittest.TestCase):
         products = [ShipmentProduct(product=1, variation=2, quantity=3)]
         method = ShipmentMethod(trackingNumber="TN123", trackingUrl="http://track.url", courier="DHL", mode="air", cost=10.5, type="express", eta=5, status="shipped")
         integration = ShipmentIntegration(id=1, integrationId="int123", app=10, status="active")
-        payload = Shipment(date="2023-01-01", products=products, method=method, integration=integration)
+        payload = Shipment(date="2023-01-01", products=products, method=method, integration=integration).model_dump(by_alias=True)
 
         mock_response = MagicMock()
         mock_response.status_code = 201
-        mock_response.json.return_value = {'success': True}
+        mock_response.json.return_value = payload
         mock_post.return_value = mock_response
         # Act
-        shipment = self.client.SalesOrder(id=1234).add_shipment(payload)
+        shipment = self.client.SalesOrder(id=1234, invoiceIntegration={
+            'id': 1,
+            'integrationId': 'test-integration',
+            'app': 1,
+            'createdAt': '2023-01-01',
+            'decreaseStock': True
+        }).add_shipment(payload)
 
         self.assertIsInstance(shipment, Shipment)
         mock_post.assert_called_once()
@@ -33,14 +39,20 @@ class TestShipment(unittest.TestCase):
         products = [ShipmentProduct(product=4, quantity=7)]
         method = ShipmentMethod(courier="FedEx", cost=15.0)
         integration = ShipmentIntegration(status="pending")
-        payload = Shipment(date="2023-02-02", products=products, method=method, integration=integration)
+        payload = Shipment(date="2023-02-02", products=products, method=method, integration=integration).model_dump(by_alias=True)
 
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {'updated': True}
+        mock_response.json.return_value = payload
         mock_put.return_value = mock_response
-
-        shipment = self.client.SalesOrder(id=1234).update_shipment(shipment_id, payload)
+        # Act
+        shipment = self.client.SalesOrder(id=1234, invoiceIntegration={
+            'id': 1,
+            'integrationId': 'test-integration',
+            'app': 1,
+            'createdAt': '2023-01-01',
+            'decreaseStock': True
+        }).update_shipment(shipment_id, payload)
 
         self.assertIsInstance(shipment, Shipment)
         mock_put.assert_called_once()

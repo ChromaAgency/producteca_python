@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel, Field
 import logging
 
@@ -9,7 +9,7 @@ class SalesOrderProduct(BaseModel):
     id: int
     name: str
     code: str
-    brand: str
+    brand: Optional[str] = None
 
 
 class SalesOrderVariationAttribute(BaseModel):
@@ -51,18 +51,18 @@ class SalesOrderPayment(BaseModel):
     coupon_amount: float = Field(alias="couponAmount")
     status: str
     method: str
-    integration: SalesOrderPaymentIntegration
+    integration: Optional[SalesOrderPaymentIntegration] = None
     transaction_fee: float = Field(alias="transactionFee")
     installments: int
-    card: SalesOrderCard
-    notes: str
+    card: Optional[SalesOrderCard] = None
+    notes: Optional[str] = None
     has_cancelable_status: bool = Field(alias="hasCancelableStatus")
     id: int
 
 
 class SalesOrderIntegration(BaseModel):
-    alternate_id: str = Field(alias="alternateId")
-    integration_id: int = Field(alias="integrationId")
+    alternate_id: Optional[str] = Field(default=None, alias="alternateId")
+    integration_id: Union[str, int] = Field(alias="integrationId")
     app: int
 
 
@@ -73,13 +73,13 @@ class SalesOrderShipmentProduct(BaseModel):
 
 
 class SalesOrderShipmentMethod(BaseModel):
-    tracking_number: str = Field(alias="trackingNumber")
+    tracking_number: Optional[str] = Field(alias="trackingNumber")
     tracking_url: str = Field(alias="trackingUrl")
     courier: str
-    mode: str
+    mode: Optional[str] = None
     cost: float
     type: str
-    eta: str
+    eta: Optional[Union[int, str]] = Field(None)
     status: str
 
 
@@ -94,12 +94,12 @@ class SalesOrderShipment(BaseModel):
     date: str
     products: List[SalesOrderShipmentProduct]
     method: SalesOrderShipmentMethod
-    integration: SalesOrderShipmentIntegration
+    integration: Optional[SalesOrderShipmentIntegration] = None
 
 
 class SalesOrderResultItem(BaseModel):
     codes: List[str]
-    contact_id: int = Field(alias="contactId")
+    contact_id: Optional[int] = Field(default=None, alias="contactId")
     currency: str
     date: str
     delivery_method: str = Field(alias="deliveryMethod")
@@ -107,33 +107,33 @@ class SalesOrderResultItem(BaseModel):
     id: str
     integration_ids: List[str] = Field(alias="integrationIds")
     integrations: List[SalesOrderIntegration]
-    invoice_integration_app: int = Field(alias="invoiceIntegrationApp")
-    invoice_integration_id: str = Field(alias="invoiceIntegrationId")
+    invoice_integration_app: Optional[int] = Field(default=None, alias="invoiceIntegrationApp")
+    invoice_integration_id: Optional[str] = Field(default=None, alias="invoiceIntegrationId")
     lines: List[SalesOrderLine]
     payments: List[SalesOrderPayment]
     payment_status: str = Field(alias="paymentStatus")
     payment_term: str = Field(alias="paymentTerm")
     product_names: List[str] = Field(alias="productNames")
-    reserving_product_ids: str = Field(alias="reservingProductIds")
+    reserving_product_ids: Union[str, List[str]] = Field(alias="reservingProductIds")
     sales_channel: int = Field(alias="salesChannel")
     shipments: List[SalesOrderShipment]
-    tracking_number: str = Field(alias="trackingNumber")
+    tracking_number: Optional[str] = Field(alias="trackingNumber")
     skus: List[str]
     status: str
     tags: List[str]
     warehouse: str
     company_id: int = Field(alias="companyId")
     shipping_cost: float = Field(alias="shippingCost")
-    contact_phone: str = Field(alias="contactPhone")
+    contact_phone: Optional[str] = Field(default=None, alias="contactPhone")
     brands: List[str]
     courier: str
     order_id: int = Field(alias="orderId")
     updated_at: str = Field(alias="updatedAt")
-    invoice_integration_created_at: str = Field(alias="invoiceIntegrationCreatedAt")
-    invoice_integration_document_url: str = Field(alias="invoiceIntegrationDocumentUrl")
+    invoice_integration_created_at: Optional[str] = Field(default=None, alias="invoiceIntegrationCreatedAt")
+    invoice_integration_document_url: Optional[str] = Field(default=None, alias="invoiceIntegrationDocumentUrl")
     has_document_url: bool = Field(alias="hasDocumentUrl")
-    integration_alternate_ids: str = Field(alias="integrationAlternateIds")
-    cart_id: str = Field(alias="cartId")
+    integration_alternate_ids: Union[str, List[str]] = Field(alias="integrationAlternateIds")
+    cart_id: Optional[str] = Field(default=None, alias="cartId")
     amount: float
     has_any_shipments: bool = Field(alias="hasAnyShipments")
 

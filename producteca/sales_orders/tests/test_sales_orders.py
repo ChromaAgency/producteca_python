@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, Mock
-from producteca.sales_orders.sales_orders import SaleOrder, SaleOrderInvoiceIntegration
+from producteca.sales_orders.sales_orders import SaleOrder
 from producteca.client import ProductecaClient
 
 
@@ -12,7 +12,14 @@ class TestSaleOrder(unittest.TestCase):
         self.mock_response = {
             "id": self.sale_order_id,
             "contact": {"id": 1, "name": "Test Contact"},
-            "lines": []
+            "lines": [],
+            "invoiceIntegration": {
+                'id': 1,
+                'integrationId': 'test-integration',
+                'app': 1,
+                'createdAt': '2023-01-01',
+                'decreaseStock': True
+            }
         }
 
     @patch('requests.get')
@@ -34,7 +41,15 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: mock_labels
         )
 
-        labels = self.client.SalesOrder(id=1234).get_shipping_labels()
+        labels = self.client.SalesOrder(id=1234, invoiceIntegration={
+                'id': 1,
+                'integrationId': 'test-integration',
+                'app': 1,
+                'createdAt': '2023-01-01',
+                'decreaseStock': True,
+                "documentUrl": "https://aallala.copm",
+                "xmlUrl": "https://aallala.copm",
+            }).get_shipping_labels()
         self.assertEqual(labels, mock_labels)
         mock_get.assert_called_once()
 
@@ -44,7 +59,15 @@ class TestSaleOrder(unittest.TestCase):
             status_code=200
         )
 
-        self.client.SalesOrder(id=1234).close()
+        self.client.SalesOrder(id=1234, invoiceIntegration={
+                'id': 1,
+                'integrationId': 'test-integration',
+                'app': 1,
+                'createdAt': '2023-01-01',
+                'decreaseStock': True,
+                "documentUrl": "https://aallala.copm",
+                "xmlUrl": "https://aallala.copm",
+            }).close()
         mock_post.assert_called_once()
 
     @patch('requests.post')
@@ -54,7 +77,15 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: {"status": "cancelled"}
         )
 
-        self.client.SalesOrder(id=1234).cancel()
+        self.client.SalesOrder(id=1234, invoiceIntegration={
+                'id': 1,
+                'integrationId': 'test-integration',
+                'app': 1,
+                'createdAt': '2023-01-01',
+                'decreaseStock': True,
+                "documentUrl": "https://aallala.copm",
+                "xmlUrl": "https://aallala.copm",
+            }).cancel()
         mock_post.assert_called_once()
 
     @patch('requests.post')
@@ -65,31 +96,30 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: self.mock_response
         )
 
-        response = self.client.SalesOrder.synchronize(sale_order)
+        response = self.client.SalesOrder(**sale_order.model_dump(by_alias=True)).synchronize()
         self.assertEqual(response.id, self.sale_order_id)
         mock_post.assert_called_once()
 
     @patch('requests.put')
     def test_invoice_integration(self, mock_put):
         invoice_data = {
-            "id": 1,
-            "integrationId": "test123",
-            "app": 1
-        }
-        invoice_integration = SaleOrderInvoiceIntegration(**invoice_data)
-        sale_order = SaleOrder(id=self.sale_order_id, invoiceIntegration=invoice_integration)
+                'id': 1,
+                'integrationId': 'test-integration',
+                'app': 1,
+                'createdAt': '2023-01-01',
+                'decreaseStock': True,
+                "documentUrl": "https://aallala.copm",
+                "xmlUrl": "https://aallala.copm",
+            }
 
         mock_put.return_value = Mock(
             status_code=200,
-            json=lambda: {
-                "id": 1,
-                "integrationId": "test123",
-                "app": 1
-                }
+            json=lambda: invoice_data,
+            ok=True
         )
 
-        response = self.client.SalesOrder(**sale_order.model_dump()).invoice_integration()
-        self.assertIsInstance(response, SaleOrder)
+        response = self.client.SalesOrder(id=self.sale_order_id, invoiceIntegration=invoice_data).invoice_integration()
+        self.assertTrue(response)
         mock_put.assert_called_once()
 
 

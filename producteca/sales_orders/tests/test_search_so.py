@@ -26,8 +26,7 @@ class TestSearchSalesOrder(unittest.TestCase):
             mock_get.return_value = mock_response
 
         response = self.client.SalesOrder.search(self.params)
-        
-        # Validate response
+
         self.assertEqual(response.count, 0)
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].id, "string")
@@ -35,14 +34,13 @@ class TestSearchSalesOrder(unittest.TestCase):
 
     @patch('requests.get')
     def test_search_saleorder_error(self, mock_get):
-        # Mock error response
         mock_response = Mock()
         mock_response.json.return_value = {"error": "Invalid request"}
         mock_response.status_code = 400
         mock_get.return_value = mock_response
         with self.assertRaises(Exception):
             self.client.SalesOrder.search(self.params)
-       
+
 
 if __name__ == '__main__':
     unittest.main()
