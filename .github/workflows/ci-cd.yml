@@ -76,7 +76,7 @@ jobs:
       - uses: qltysh/qlty-action/coverage@v1
         with:
           token: ${{secrets.QLTY_COVERAGE_TOKEN}}
-          files: coverage.xml
+          files: coverage.xml/coverage.xml
             
   publish-to-pypi:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
