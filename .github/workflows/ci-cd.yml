@@ -48,6 +48,7 @@ jobs:
           git fetch origin
           git checkout --track origin/${{github.event.pull_request.head.ref}}
           git pull 
+          git add -A
           git commit -am "Automated coverage report"
           git push 
       - name: Run build
@@ -64,7 +65,7 @@ jobs:
       - uses: qltysh/qlty-action/coverage@v1
         with:
           token: ${{secrets.QLTY_COVERAGE_TOKEN}}
-          files: .coverage
+          files: target/.coverage
             
     # name: Build distribution 📦
     # runs-on: ubuntu-latest
