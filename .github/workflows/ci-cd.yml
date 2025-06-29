@@ -37,7 +37,7 @@ jobs:
           git config --global user.name 'Git bot'
           git config --global user.email 'gitbot@users.noreply.github.com'
           git fetch origin
-          git checkout --track origin/main
+          git checkout origin/main
           git pull 
       - name: Bump version
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
