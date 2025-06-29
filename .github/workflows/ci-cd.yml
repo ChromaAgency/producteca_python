@@ -47,9 +47,9 @@ jobs:
         run: poetry run test
       - name: Run coverage report
         run: poetry run get_coverage
-      - name: Ferch repo
+      - name: Push changes
         run: |
-        
+          git status
           git commit -am "Automated coverage report"
           git push 
       - name: Run build
