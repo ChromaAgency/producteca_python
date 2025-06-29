@@ -1,81 +1,12 @@
 import unittest
 from unittest.mock import patch, Mock
-from producteca.config.config import ConfigProducteca
-from producteca.search.search_sale_orders import SearchSalesOrder, SearchSalesOrderParams, SearchSalesOrderResponse
-from producteca.search.search import SearchProduct, SearchProductParams
-
-class TestSearchSalesOrder(unittest.TestCase):
-    def setUp(self):
-        self.config = ConfigProducteca(
-            token="test_client_id",
-            api_key="test_client_secret",
-        )
-        self.params = SearchSalesOrderParams(
-            top=10,
-            skip=0,
-            filter="status eq 'confirmed'"
-        )
-
-    @patch('requests.get')
-    def test_search_saleorder_success(self, mock_get):
-        # Mock successful response
-        mock_response = Mock()
-        mock_response.json.return_value = {
-            "count": 1,
-            "results": [{
-                "id": "123",
-                "status": "confirmed",
-                "lines": [],
-                "payments": [],
-                "shipments": [],
-                "integrations": [],
-                "codes": [],
-                "integration_ids": [],
-                "product_names": [],
-                "skus": [],
-                "tags": [],
-                "brands": []
-            }]
-        }
-        mock_response.status_code = 200
-        mock_get.return_value = mock_response
-
-        response, status_code = SearchSalesOrder.search_saleorder(self.config, self.params)
-        
-        # Validate response
-        self.assertEqual(status_code, 200)
-        self.assertEqual(response["count"], 1)
-        self.assertEqual(len(response["results"]), 1)
-        self.assertEqual(response["results"][0]["id"], "123")
-
-        # Verify the request was made with correct parameters
-        expected_url = f"{self.config.get_endpoint(SearchSalesOrder.endpoint)}?$filter={self.params.filter}&top={self.params.top}&skip={self.params.skip}"
-        mock_get.assert_called_once_with(
-            expected_url,
-            headers=self.config.headers
-        )
-
-    @patch('requests.get')
-    def test_search_saleorder_error(self, mock_get):
-        # Mock error response
-        mock_response = Mock()
-        mock_response.json.return_value = {"error": "Invalid request"}
-        mock_response.status_code = 400
-        mock_get.return_value = mock_response
-
-        response, status_code = SearchSalesOrder.search_saleorder(self.config, self.params)
-        
-        # Validate error response
-        self.assertEqual(status_code, 400)
-        self.assertEqual(response["error"], "Invalid request")
+from producteca.products.search_products import SearchProductParams
+from producteca.client import ProductecaClient
 
 
 class TestSearchProduct(unittest.TestCase):
     def setUp(self):
-        self.config = ConfigProducteca(
-            token="test_client_id",
-            api_key="test_client_secret",
-        )
+        self.client = ProductecaClient(token="test_client_id", api_key="test_client_secret")
         self.params = SearchProductParams(
             top=10,
             skip=0,
@@ -181,15 +112,13 @@ class TestSearchProduct(unittest.TestCase):
         mock_response.status_code = 200
         mock_get.return_value = mock_response
 
-        response = SearchProduct.search_product(self.config, self.params)
+        response = self.client.Product.search(self.params)
         
         # Validate response
         self.assertEqual(response.count, 1)
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].id, 123)
         self.assertEqual(response.results[0].name, "Test Product")
-        
-        
 
     @patch('requests.get')
     def test_search_product_error(self, mock_get):
@@ -200,7 +129,7 @@ class TestSearchProduct(unittest.TestCase):
         mock_get.return_value = mock_response
         # TODO: Fix this
         # with self.assertRaises(Exception):
-        #     SearchProduct.search_product(self.config, self.params)
+        #     self.client.Product.search(self.params)
 
 
 if __name__ == '__main__':

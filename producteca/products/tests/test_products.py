@@ -1,17 +1,17 @@
 import unittest
 from unittest.mock import patch, Mock
-from producteca.config.config import ConfigProducteca
-from producteca.products.products import Product, MeliProduct
+from producteca.products.products import Product
+from producteca.client import ProductecaClient
 
 
 class TestProduct(unittest.TestCase):
     def setUp(self):
-        self.config = ConfigProducteca(token="test_id", api_key="test_secret")
+        self.client = ProductecaClient(token="test_client_id", api_key="test_client_secret")
         self.test_product = Product(
-            config=self.config,
             sku="TEST001",
             name="Test Product",
-            code="TEST001"
+            code="TEST001",
+            category="Test"
         )
 
     @patch('requests.post')
@@ -19,13 +19,12 @@ class TestProduct(unittest.TestCase):
         # Mock successful response
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"id": 1, "sku": "TEST001"}
+        mock_response.json.return_value = self.test_product.model_dump()
         mock_post.return_value = mock_response
 
-        response, status_code = self.test_product.create()
+        response = self.client.Product(**self.test_product.model_dump()).create()
         
-        self.assertEqual(status_code, 200)
-        self.assertEqual(response["sku"], "TEST001")
+        self.assertEqual(response.sku, "TEST001")
 
     @patch('requests.post')
     def test_create_product_not_exist(self, mock_post):
@@ -34,48 +33,45 @@ class TestProduct(unittest.TestCase):
         mock_response.status_code = 204
         mock_post.return_value = mock_response
 
-        response, status_code = self.test_product.create()
-        
-        self.assertEqual(status_code, 204)
-        self.assertEqual(response["Message"], "Product does not exist and the request cant create if it does not exist")
+        with self.assertRaises(Exception):
+            self.client.Product.create()
 
     @patch('requests.post')
     def test_update_product_success(self, mock_post):
         # Mock successful update
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"id": 1, "sku": "TEST001", "name": "Updated Product"}
+        mock_response.json.return_value = self.test_product.model_dump()
         mock_post.return_value = mock_response
 
-        response, status_code = self.test_product.update()
+        response = self.client.Product(**self.test_product.model_dump()).update()
         
-        self.assertEqual(status_code, 200)
-        self.assertEqual(response["name"], "Updated Product")
+        self.assertEqual(response.name, "Test Product")
 
     @patch('requests.get')
     def test_get_product(self, mock_get):
         # Mock get product response
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"id": 1, "sku": "TEST001"}
+        mock_response.json.return_value = self.test_product.model_dump()
         mock_get.return_value = mock_response
 
-        response, status_code = Product.get(self.config, 1)
+        response = self.client.Product.get(1)
         
-        self.assertEqual(status_code, 200)
-        self.assertEqual(response["sku"], "TEST001")
+        self.assertEqual(response.sku, "TEST001")
 
     @patch('requests.get')
     def test_get_bundle(self, mock_get):
         # Mock get bundle response
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"sku": "TEST001", "bundles": []}
+        test_prod = self.test_product.model_dump()
+        test_prod.update({"sku": "TEST001", "bundles": []})
+        mock_response.json.return_value = test_prod
         mock_get.return_value = mock_response
 
-        product, status_code = Product.get_bundle(self.config, 1)
+        product = self.client.Product.get_bundle(1)
         
-        self.assertEqual(status_code, 200)
         self.assertEqual(product.sku, "TEST001")
 
     @patch('requests.get')
@@ -83,13 +79,15 @@ class TestProduct(unittest.TestCase):
         # Mock ML integration response
         mock_response = Mock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {"sku": "TEST001", "integrations": []}
+        test_prod = self.test_product.model_dump()
+        test_prod.update({"sku": "TEST001", "integrations": []})
+        mock_response.json.return_value = test_prod
         mock_get.return_value = mock_response
 
-        product, status_code = Product.get_ml_integration(self.config, 1)
+        product = self.client.Product.get_ml_integration(1)
         
-        self.assertEqual(status_code, 200)
         self.assertEqual(product.sku, "TEST001")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,9 +1,14 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import requests
-from ..config.config import ConfigProducteca
+from producteca.abstract.abstract_dataclass import BaseService
+from producteca.sales_orders.search_sale_orders import SearchSalesOrderParams, SearchSalesOrder
+from producteca.payments.payments import Payment
+from producteca.shipments.shipment import Shipment
+from dataclasses import dataclass
 import logging
 _logger = logging.getLogger(__name__)
+
 
 class SaleOrderLocation(BaseModel):
     streetName: Optional[str] = None
@@ -13,6 +18,7 @@ class SaleOrderLocation(BaseModel):
     city: Optional[str] = None
     neighborhood: Optional[str] = None
     zipCode: Optional[str] = None
+
 
 class SaleOrderBillingInfo(BaseModel):
     docType: Optional[str] = None
@@ -29,10 +35,12 @@ class SaleOrderBillingInfo(BaseModel):
     lastName: Optional[str] = None
     businessName: Optional[str] = None
 
+
 class SaleOrderProfile(BaseModel):
     app: int
     integrationId: str
     nickname: Optional[str] = None
+
 
 class SaleOrderContact(BaseModel):
     id: int
@@ -49,14 +57,17 @@ class SaleOrderContact(BaseModel):
     profile: Optional[SaleOrderProfile] = None
     billingInfo: Optional[SaleOrderBillingInfo] = None
 
+
 class SaleOrderIntegrationId(BaseModel):
     alternateId: Optional[str] = None
     integrationId: str
     app: int
 
+
 class SaleOrderVariationPicture(BaseModel):
     url: str
     id: Optional[int] = None
+
 
 class SaleOrderVariationStock(BaseModel):
     warehouseId: Optional[int] = None
@@ -66,9 +77,11 @@ class SaleOrderVariationStock(BaseModel):
     lastModified: Optional[str] = None
     available: int
 
+
 class SaleOrderVariationAttribute(BaseModel):
     key: str
     value: str
+
 
 class SaleOrderVariation(BaseModel):
     supplierCode: Optional[str] = None
@@ -86,14 +99,17 @@ class SaleOrderVariation(BaseModel):
     sku: str
     barcode: Optional[str] = None
 
+
 class SaleOrderProduct(BaseModel):
     name: str
     code: str
     brand: Optional[str] = None
     id: int
 
+
 class SaleOrderConversation(BaseModel):
     questions: Optional[List[str]] = None
+
 
 class SaleOrderLine(BaseModel):
     price: float
@@ -107,6 +123,7 @@ class SaleOrderLine(BaseModel):
     reserved: Optional[int] = None
     id: int
 
+
 class SaleOrderCard(BaseModel):
     paymentNetwork: Optional[str] = None
     firstSixDigits: Optional[int] = None
@@ -115,9 +132,11 @@ class SaleOrderCard(BaseModel):
     cardholderIdentificationType: Optional[str] = None
     cardholderName: Optional[str] = None
 
+
 class SaleOrderPaymentIntegration(BaseModel):
     integrationId: str
     app: int
+
 
 class SaleOrderPayment(BaseModel):
     date: Optional[str] = None
@@ -134,6 +153,7 @@ class SaleOrderPayment(BaseModel):
     hasCancelableStatus: Optional[bool] = None
     id: Optional[int] = None
 
+
 class SaleOrderShipmentMethod(BaseModel):
     trackingNumber: Optional[str] = None
     trackingUrl: Optional[str] = None
@@ -144,16 +164,19 @@ class SaleOrderShipmentMethod(BaseModel):
     eta: Optional[int] = None
     status: Optional[str] = None
 
+
 class SaleOrderShipmentProduct(BaseModel):
     product: int
     variation: int
     quantity: int
+
 
 class SaleOrderShipmentIntegration(BaseModel):
     app: int
     integrationId: str
     status: str
     id: int
+
 
 class SaleOrderShipment(BaseModel):
     date: str
@@ -163,6 +186,7 @@ class SaleOrderShipment(BaseModel):
     receiver: Optional[dict] = None
     id: int
 
+
 class SaleOrderInvoiceIntegration(BaseModel):
     id: Optional[int] = None
     integrationId: Optional[str] = None
@@ -171,6 +195,7 @@ class SaleOrderInvoiceIntegration(BaseModel):
     documentUrl: Optional[str] = None
     xmlUrl: Optional[str] = None
     decreaseStock: Optional[bool] = None
+
 
 class SaleOrder(BaseModel):
     tags: Optional[List[str]] = None
@@ -210,46 +235,114 @@ class SaleOrder(BaseModel):
     notes: Optional[str] = None
     id: int
 
-    @classmethod
-    def get(cls, config: ConfigProducteca, sale_order_id: int) -> "SaleOrder":
-        endpoint = f'salesorders/{sale_order_id}'
-        url = config.get_endpoint(endpoint)
-        response = requests.get(url, headers=config.headers)
-        return cls(**response.json())
 
-    @classmethod
-    def get_shipping_labels(cls, config: ConfigProducteca, sale_order_id: int):
-        endpoint = f'salesorders/{sale_order_id}/labels'
-        url = config.get_endpoint(endpoint)
-        response = requests.get(url, headers=config.headers)
+@dataclass
+class SaleOrderService(BaseService[SaleOrder]):
+    endpoint: str = Field(default='salesorders', exclude=True)
+
+    def __call__(self, **payload):
+        self._record = SaleOrder(**payload)
+        return self
+
+    def get(self, sale_order_id: int) -> "SaleOrder":
+        endpoint = f'{self.endpoint}/{sale_order_id}'
+        url = self.config.get_endpoint(endpoint)
+        response = requests.get(url, headers=self.config.headers)
+        if not response.ok:
+            raise Exception("Order could not be fetched")
+        return SaleOrder(**response.json())
+
+    def get_shipping_labels(self):
+        if not self._record:
+            raise Exception("You need to add a record id")
+        endpoint = f'{self.endpoint}/{self._record.id}/labels'
+        url = self.config.get_endpoint(endpoint)
+        response = requests.get(url, headers=self.config.headers)
+        if not response.ok:
+            raise Exception("labels could not be gotten")
         return response.json()
 
-    @classmethod
-    def close(cls, config: ConfigProducteca, sale_order_id: int):
-        endpoint = f'salesorders/{sale_order_id}/close'
-        url = config.get_endpoint(endpoint)
-        response = requests.post(url, headers=config.headers)
-        return response.status_code, response.json()
+    def close(self):
+        if not self._record:
+            raise Exception("You need to add a record id")
+        endpoint = f'{self.endpoint}/{self._record.id}/close'
+        url = self.config.get_endpoint(endpoint)
+        response = requests.post(url, headers=self.config.headers)
+        if not response.ok:
+            raise Exception("Order could not be closed")
 
-    @classmethod
-    def cancel(cls, config: ConfigProducteca, sale_order_id: int):
-        endpoint = f'salesorders/{sale_order_id}/cancel'
-        url = config.get_endpoint(endpoint)
-        response = requests.post(url, headers=config.headers)
-        return response.status_code, response.json()
+    def cancel(self):
+        if not self._record:
+            raise Exception("You need to add a record id")
+        endpoint = f'{self.endpoint}/{self._record.id}/cancel'
+        url = self.config.get_endpoint(endpoint)
+        response = requests.post(url, headers=self.config.headers)
+        if not response.ok:
+            raise Exception("Order could not be closed")
 
-    @classmethod
-    def synchronize(cls, config: ConfigProducteca, payload: "SaleOrder") -> tuple[int, "SaleOrder"]:
-        endpoint = 'salesorders/synchronize'
-        url = config.get_endpoint(endpoint)
-        response = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=config.headers)
-        return response.status_code, cls(**response.json())
+    def synchronize(self, payload: "SaleOrder") -> "SaleOrder":
+        endpoint = f'{self.endpoint}/synchronize'
+        url = self.config.get_endpoint(endpoint)
+        response = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        if not response.ok:
+            raise Exception(f"Synchronize error {response.text}")
+        return SaleOrder(**response.json())
 
-    @classmethod
-    def invoice_integration(cls, config: ConfigProducteca, sale_order_id: int, payload: "SaleOrder"):
-        endpoint = f'salesorders/{sale_order_id}/invoiceIntegration'
-        url = config.get_endpoint(endpoint)
-        response = requests.put(url, headers=config.headers, data=payload.model_dump_json(exclude_none=True))
-        if response.status_code == 200:
-            return response.status_code, {}
-        return response.status_code, response.json()
+    def invoice_integration(self):
+        if not self._record:
+            raise Exception("You need to add a record id")
+        endpoint = f'{self.endpoint}/{self._record.id}/invoiceIntegration'
+        url = self.config.get_endpoint(endpoint)
+        response = requests.put(url, headers=self.config.headers, data=self._record.model_dump_json(exclude_none=True))
+        if not response.ok:
+            raise Exception(f"Error on resposne {response.text}")
+        return SaleOrder(**response.json())
+
+    def search(self, params: SearchSalesOrderParams):
+        endpoint: str = f"search/{self.endpoint}"
+        headers = self.config.headers
+        url = self.config.get_endpoint(endpoint)
+        new_url = f"{url}?$filter={params.filter}&top={params.top}&skip={params.skip}"
+        response = requests.get(
+            new_url,
+            headers=headers,
+        )
+        if not response.ok:
+            raise Exception(f"Error on resposne {response.text}")
+        return SearchSalesOrder(**response.json())
+
+    def add_payment(self, payload: "Payment") -> "Payment":
+        if not self._record:
+            raise Exception("You need to add a record id")
+        url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/payments")
+        res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        if not res.ok:
+            raise Exception(f"Error on resposne {res.text}")
+        return Payment(**res.json())
+
+    def update_payment(self, payment_id: int, payload: "Payment") -> "Payment":
+        if not self._record:
+            raise Exception("You need to add a record id")
+        url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/payments/{payment_id}")
+        res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        if not res.ok:
+            raise Exception(f"Error on payment update {res.text}")
+        return Payment(**res.json())
+
+    def add_shipment(self, payload: "Shipment") -> "Shipment":
+        if not self._record:
+            raise Exception("You need to add a record id")
+        url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/shipments")
+        res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        if not res.ok:
+            raise Exception(f"Error on shipment add {res.text}")
+        return Shipment(**res.json())
+
+    def update_shipment(self, shipment_id: str, payload: "Shipment") -> "Shipment":
+        if not self._record:
+            raise Exception("You need to add a record id")
+        url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/shipments/{shipment_id}")
+        res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        if not res.ok:
+            raise Exception(f"Error on shipment update {res.text}")
+        return Shipment(**res.json())

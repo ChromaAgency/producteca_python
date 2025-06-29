@@ -1,7 +1,5 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
-import requests
-from ..config.config import ConfigProducteca
 
 
 class FacetValue(BaseModel):
@@ -124,7 +122,7 @@ class SearchResultItem(BaseModel):
     channel_pictures_templates_apps: Optional[List[str]]
 
 
-class SearchProductResponse(BaseModel):
+class SearchProduct(BaseModel):
     count: int
     facets: List[Facet]
     results: List[SearchResultItem]
@@ -138,12 +136,4 @@ class SearchProductParams(BaseModel):
     sales_channel: Optional[str] = Field(default='2', alias='salesChannel')
 
 
-class SearchProduct:
-    endpoint: str = 'search/products'
 
-    @classmethod
-    def search_product(cls, config: ConfigProducteca, params: SearchProductParams) -> SearchProductResponse:
-        headers = config.headers
-        url = config.get_endpoint(cls.endpoint)
-        response = requests.get(url, headers=headers, params=params.model_dump(by_alias=True, exclude_none=True))
-        return SearchProductResponse(**response.json())
