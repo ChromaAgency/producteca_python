@@ -1,7 +1,5 @@
 from typing import List, Optional
 from pydantic import BaseModel
-import requests
-from ..config.config import ConfigProducteca
 
 
 class ShipmentProduct(BaseModel):
@@ -33,15 +31,3 @@ class Shipment(BaseModel):
     products: Optional[List[ShipmentProduct]] = None
     method: Optional[ShipmentMethod] = None
     integration: Optional[ShipmentIntegration] = None
-
-    @classmethod
-    def create(cls, config: ConfigProducteca, sale_order_id: int, payload: "Shipment") -> "Shipment":
-        url = config.get_endpoint(f"salesorders/{sale_order_id}/shipments")
-        res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=config.headers)
-        return res.status_code, res.json()
-
-    @classmethod
-    def update(cls, config: ConfigProducteca, sale_order_id: int, shipment_id: str, payload: "Shipment") -> "Shipment":
-        url = config.get_endpoint(f"salesorders/{sale_order_id}/shipments/{shipment_id}")
-        res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=config.headers)
-        return res.status_code, res.json()

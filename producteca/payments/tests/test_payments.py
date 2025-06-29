@@ -1,13 +1,13 @@
 import unittest
 from unittest.mock import patch, Mock
 from datetime import datetime
-from producteca.config.config import ConfigProducteca
-from producteca.payments.payments import Payment, PaymentCard, PaymentIntegration
+from producteca.client import ProductecaClient
+from producteca.payments.payments import Payment
 
 
 class TestPayments(unittest.TestCase):
     def setUp(self):
-        self.config = ConfigProducteca(token="asd", api_key="test_key")
+        self.client = ProductecaClient(token="asd", api_key="test_key")
         self.sale_order_id = 123
         self.payment_id = 456
         
@@ -35,7 +35,7 @@ class TestPayments(unittest.TestCase):
         payment = Payment(**self.payment_data)
         
         # Test create method
-        result = Payment.create(self.config, self.sale_order_id, payment)
+        result = self.client.SalesOrder(id=self.sale_order_id).add_payment(payment)
         
         # Assertions
         mock_post.assert_called_once()
@@ -55,7 +55,7 @@ class TestPayments(unittest.TestCase):
         payment = Payment(**self.payment_data)
         
         # Test update method
-        result = Payment.update(self.config, self.sale_order_id, self.payment_id, payment)
+        result = self.client.SalesOrder(id=self.sale_order_id).update_payment(self.payment_id, payment)
         
         # Assertions
         mock_put.assert_called_once()

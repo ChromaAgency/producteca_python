@@ -1,7 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional
-import requests
-from ..config.config import ConfigProducteca
 
 
 class PaymentCard(BaseModel):
@@ -32,14 +30,4 @@ class Payment(BaseModel):
     hasCancelableStatus: bool
     id: Optional[int] = None
 
-    @classmethod
-    def create(cls, config: ConfigProducteca, sale_order_id: int, payload: "Payment") -> "Payment":
-        url = config.get_endpoint(f"salesorders/{sale_order_id}/payments")
-        res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=config.headers)
-        return cls(**res.json())
 
-    @classmethod
-    def update(cls, config: ConfigProducteca, sale_order_id: int, payment_id: int, payload: "Payment") -> "Payment":
-        url = config.get_endpoint(f"salesorders/{sale_order_id}/payments/{payment_id}")
-        res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=config.headers)
-        return cls(**res.json())
