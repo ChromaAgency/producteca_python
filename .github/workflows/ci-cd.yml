@@ -46,7 +46,9 @@ jobs:
       - name: Run tests
         run: poetry run test
       - name: Run coverage report
-        run: poetry run get_coverage
+        run: |
+          poetry run get_coverage
+          git status
       - name: Push changes
         run: |
           git status
