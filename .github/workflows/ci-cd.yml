@@ -49,7 +49,7 @@ jobs:
           git push 
   coverage:
     runs-on: ubuntu-latest
-    needs: ci 
+    needs: build 
     steps:
       - uses: actions/checkout@v4
       - uses: paambaati/codeclimate-action@v9.0.0
