@@ -31,13 +31,12 @@ jobs:
       - name: Install deps
         run: poetry install
       - name: Ferch repo
-        # ${{github.event.pull_request.head.ref}}
         run: |
           git status
           git config --global user.name 'Git bot'
           git config --global user.email 'gitbot@users.noreply.github.com'
           git fetch origin
-          git checkout origin/main
+          git checkout --track origin/${{github.event.pull_request.head.ref}}
           git pull 
       - name: Bump version
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
