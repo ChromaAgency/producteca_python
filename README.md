@@ -1,9 +1,10 @@
-
+[![Maintainability](https://qlty.sh/badges/950972cf-31e6-47cb-ab37-0ad0565c3a59/maintainability.svg)](https://qlty.sh/gh/ChromaAgency/projects/producteca_python)
+[![Code Coverage](https://qlty.sh/badges/950972cf-31e6-47cb-ab37-0ad0565c3a59/test_coverage.svg)](https://qlty.sh/gh/ChromaAgency/projects/producteca_python)
 [![Test](https://github.com/ChromaAgency/producteca_python/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/ChromaAgency/producteca_python/actions/workflows/ci-cd.yml)
 
 # Producteca
 
-This is a tool to split the timesheets of a project in Odoo into different projects.
+This is a small module, to make requests to Producteca API. 
 
 ## Install for development
 
