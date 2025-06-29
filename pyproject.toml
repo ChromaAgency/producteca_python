@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "producteca"
-version = "1.0.6"
+version = "1.0.7"
 description = ""
 authors = ["Chroma Agency, Matias Rivera <mrivera@chroma.agency>"]
 readme = "README.md"
@@ -12,7 +12,7 @@ test = 'scripts:test'
 
 [tool.poetry.dependencies]
 python = "^3.8"
-requests = "^2.31.0"
+requests = "^2.32.4"
 coverage = "^7.2.0"
 pydantic = "^2.10.0"
 
