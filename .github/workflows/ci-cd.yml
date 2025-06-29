@@ -48,7 +48,9 @@ jobs:
           git commit -am "Automated coverage report"
           git push 
       - name: Run build
-        run: poetry run build
+        run: poetry build
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
