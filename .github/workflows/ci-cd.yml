@@ -1,15 +1,6 @@
 name: CI/CD
-on: 
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-  release:
-    types: [created]
-    branches:
-      - main
+on: pull_request
+
 jobs:
   build:
     strategy:
@@ -39,7 +30,6 @@ jobs:
           git checkout --track origin/${{github.event.pull_request.head.ref}}
           git pull 
       - name: Bump version
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           poetry version patch
           VERSION=$(poetry version -s)
