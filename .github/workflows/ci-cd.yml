@@ -68,7 +68,7 @@ jobs:
       - uses: qltysh/qlty-action/coverage@v1
         with:
           token: ${{secrets.QLTY_COVERAGE_TOKEN}}
-          files: coverage.xml:coverage.py
+          files: coverage.xml
             
   publish-to-pypi:
     name: >-
