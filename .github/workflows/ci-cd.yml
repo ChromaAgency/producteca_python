@@ -28,14 +28,14 @@ jobs:
       - name: Install deps
         run: poetry install
       - name: Fetch repo
-        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           git status
           git config --global user.name 'Git bot'
           git config --global user.email 'gitbot@users.noreply.github.com'
           git pull 
       - name: Bump version
-        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           poetry version patch
           VERSION=$(poetry version -s)
