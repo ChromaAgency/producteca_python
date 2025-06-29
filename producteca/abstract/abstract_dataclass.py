@@ -1,7 +1,9 @@
 from abc import ABC
 from ..config.config import ConfigProducteca
+from dataclasses import dataclass
 
 
+@dataclass
 class BaseService(ABC):
-    endpoint: str
     config: ConfigProducteca
+    endpoint: str

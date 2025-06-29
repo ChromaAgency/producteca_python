@@ -1,13 +1,12 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from producteca.shipments.shipment import Shipment, ShipmentProduct, ShipmentMethod, ShipmentIntegration, ConfigProducteca
+from producteca.shipments.shipment import Shipment, ShipmentProduct, ShipmentMethod, ShipmentIntegration
 from producteca.client import ProductecaClient
 
 
 class TestShipment(unittest.TestCase):
     def setUp(self):
-        config = ConfigProducteca(token="test_id", api_key="test_secret")
-        self.client = ProductecaClient(config)
+        self.client = ProductecaClient(token="test_id", api_key="test_secret")
         
     @patch('requests.post')
     def test_create_shipment(self, mock_post):
@@ -23,17 +22,14 @@ class TestShipment(unittest.TestCase):
         mock_response.json.return_value = {'success': True}
         mock_post.return_value = mock_response
         # Act
-        status_code, response_json = self.client.Shipment.create(sale_order_id, payload)
+        shipment = self.client.Shipment.create(sale_order_id, payload)
 
-        # Assert
-        self.assertEqual(status_code, 201)
-        self.assertEqual(response_json, {'success': True})
+        self.assertEqual(shipment, {'success': True})
         mock_post.assert_called_once()
 
     @patch('requests.put')
     def test_update_shipment(self, mock_put):
         # Arrange
-        config = ConfigProducteca(token="test_token", api_key="as")
         sale_order_id = 123
         shipment_id = 'abc'
         products = [ShipmentProduct(product=4, quantity=7)]
@@ -46,12 +42,9 @@ class TestShipment(unittest.TestCase):
         mock_response.json.return_value = {'updated': True}
         mock_put.return_value = mock_response
 
-        # Act
-        status_code, response_json = Shipment.update(config, sale_order_id, shipment_id, payload)
+        shipment = self.client.Shipment.update(sale_order_id, shipment_id, payload)
 
-        # Assert
-        self.assertEqual(status_code, 200)
-        self.assertEqual(response_json, {'updated': True})
+        self.assertEqual(shipment, {'updated': True})
         mock_put.assert_called_once()
 
 

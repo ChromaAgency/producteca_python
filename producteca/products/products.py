@@ -2,6 +2,7 @@ from typing import List, Optional, Union
 from pydantic import BaseModel, Field
 from dataclasses import dataclass
 from producteca.abstract.abstract_dataclass import BaseService
+from producteca.products.search_products import SearchProduct, SearchProductParams
 import logging
 import requests
 
@@ -193,3 +194,10 @@ class ProductService(BaseService):
         if not response.ok:
             raise Exception(f"Error getting ml integration {product_id}\n {response.text}")
         return MeliProduct(**response.json())
+
+    def search(self, params: SearchProductParams) -> SearchProduct:
+        endpoint: str = f'search/{self.endpoint}'
+        headers = self.config.headers
+        url = self.config.get_endpoint(endpoint)
+        response = requests.get(url, headers=headers, params=params.model_dump(by_alias=True, exclude_none=True))
+        return SearchProduct(**response.json())

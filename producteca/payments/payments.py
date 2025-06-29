@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 import requests
 from producteca.abstract.abstract_dataclass import BaseService
@@ -34,13 +34,14 @@ class Payment(BaseModel):
 
 
 class PaymentService(BaseService):
+    endpoint: str = Field(default='salesorders', exclude=True)
 
     def create(self, sale_order_id: int, payload: "Payment") -> "Payment":
-        url = self.config.get_endpoint(f"salesorders/{sale_order_id}/payments")
+        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/payments")
         res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
         return Payment(**res.json())
 
     def update(self, sale_order_id: int, payment_id: int, payload: "Payment") -> "Payment":
-        url = self.config.get_endpoint(f"salesorders/{sale_order_id}/payments/{payment_id}")
+        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/payments/{payment_id}")
         res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
         return Payment(**res.json())

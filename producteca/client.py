@@ -8,7 +8,7 @@ import os
 
 class ProductecaClient:
 
-    def __init__(self, token: str = os.environ['PRODUCTECA_TOKEN'], api_key: str = os.environ['PRODUCTECA_API_KEY']):
+    def __init__(self, token: str = os.environ.get('PRODUCTECA_TOKEN', ''), api_key: str = os.environ.get('PRODUCTECA_API_KEY', '')):
         if not token:
             raise ValueError('PRODUCTECA_TOKEN environment variable not set')
         if not api_key:

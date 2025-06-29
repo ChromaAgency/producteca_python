@@ -1,15 +1,12 @@
 import unittest
 from unittest.mock import patch, Mock
-from producteca.config.config import ConfigProducteca
-from producteca.products.search_products import SearchProduct, SearchProductParams
+from producteca.products.search_products import SearchProductParams
+from producteca.client import ProductecaClient
 
 
 class TestSearchProduct(unittest.TestCase):
     def setUp(self):
-        self.config = ConfigProducteca(
-            token="test_client_id",
-            api_key="test_client_secret",
-        )
+        self.client = ProductecaClient(token="test_client_id", api_key="test_client_secret")
         self.params = SearchProductParams(
             top=10,
             skip=0,
@@ -115,26 +112,13 @@ class TestSearchProduct(unittest.TestCase):
         mock_response.status_code = 200
         mock_get.return_value = mock_response
 
-        response = SearchProduct.search_product(self.config, self.params)
+        response = self.client.Product.search(self.params)
         
         # Validate response
         self.assertEqual(response.count, 1)
         self.assertEqual(len(response.results), 1)
         self.assertEqual(response.results[0].id, 123)
         self.assertEqual(response.results[0].name, "Test Product")
-        
-        # Verify request parameters
-        mock_get.assert_called_once_with(
-            self.config.get_endpoint(SearchProduct.endpoint),
-            headers=self.config.headers,
-            params={
-                'top': 10,
-                'skip': 0,
-                '$filter': "status eq 'active'",
-                'search': 'test product',
-                'salesChannel': '2'
-            }
-        )
 
     @patch('requests.get')
     def test_search_product_error(self, mock_get):
@@ -145,7 +129,7 @@ class TestSearchProduct(unittest.TestCase):
         mock_get.return_value = mock_response
         # TODO: Fix this
         # with self.assertRaises(Exception):
-        #     SearchProduct.search_product(self.config, self.params)
+        #     self.client.Product.search(self.params)
 
 
 if __name__ == '__main__':

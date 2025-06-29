@@ -1,12 +1,13 @@
 import unittest
 from unittest.mock import patch, Mock
-from producteca.config.config import ConfigProducteca
 from producteca.sales_orders.sales_orders import SaleOrder, SaleOrderInvoiceIntegration
+from producteca.client import ProductecaClient
 
 
 class TestSaleOrder(unittest.TestCase):
+
     def setUp(self):
-        self.config = ConfigProducteca(token="test_client", api_key="test_secret")
+        self.client = ProductecaClient(token="test_client", api_key="test_secret")
         self.sale_order_id = 123
         self.mock_response = {
             "id": self.sale_order_id,
@@ -21,7 +22,7 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: self.mock_response
         )
 
-        sale_order = SaleOrder.get(self.config, self.sale_order_id)
+        sale_order = self.client.SalesOrder.get(self.sale_order_id)
         self.assertEqual(sale_order.id, self.sale_order_id)
         mock_get.assert_called_once()
 
@@ -33,7 +34,7 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: mock_labels
         )
 
-        labels = SaleOrder.get_shipping_labels(self.config, self.sale_order_id)
+        labels = self.client.SalesOrder.get_shipping_labels(self.sale_order_id)
         self.assertEqual(labels, mock_labels)
         mock_get.assert_called_once()
 
@@ -44,7 +45,7 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: {"status": "closed"}
         )
 
-        status_code, response = SaleOrder.close(self.config, self.sale_order_id)
+        status_code, response = self.client.SalesOrder.close(self.sale_order_id)
         self.assertEqual(status_code, 200)
         self.assertEqual(response, {"status": "closed"})
         mock_post.assert_called_once()
@@ -56,7 +57,7 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: {"status": "cancelled"}
         )
 
-        status_code, response = SaleOrder.cancel(self.config, self.sale_order_id)
+        status_code, response = self.client.SalesOrder.cancel(self.sale_order_id)
         self.assertEqual(status_code, 200)
         self.assertEqual(response, {"status": "cancelled"})
         mock_post.assert_called_once()
@@ -69,7 +70,7 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: self.mock_response
         )
 
-        status_code, response = SaleOrder.synchronize(self.config, sale_order)
+        status_code, response = self.client.SalesOrder.synchronize(sale_order)
         self.assertEqual(status_code, 200)
         self.assertEqual(response.id, self.sale_order_id)
         mock_post.assert_called_once()
@@ -89,7 +90,7 @@ class TestSaleOrder(unittest.TestCase):
             json=lambda: {}
         )
 
-        status_code, response = SaleOrder.invoice_integration(self.config, self.sale_order_id, sale_order)
+        status_code, response = self.client.SalesOrder.invoice_integration(self.sale_order_id, sale_order)
         self.assertEqual(status_code, 200)
         self.assertEqual(response, {})
         mock_put.assert_called_once()

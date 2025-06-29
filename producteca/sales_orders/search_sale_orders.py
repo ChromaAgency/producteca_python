@@ -1,7 +1,5 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
-import requests
-from producteca.config.config import ConfigProducteca
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -140,7 +138,7 @@ class SalesOrderResultItem(BaseModel):
     has_any_shipments: bool
 
 
-class SearchSalesOrderResponse(BaseModel):
+class SearchSalesOrder(BaseModel):
     count: int
     results: List[SalesOrderResultItem]
 
@@ -149,23 +147,6 @@ class SearchSalesOrderParams(BaseModel):
     top: Optional[int]
     skip: Optional[int]
     filter: Optional[str] = Field(default=None, alias="$filter")
-    
+
     class Config:
         validate_by_name = True
-
-
-class SearchSalesOrder:
-    endpoint: str = "search/salesorders"
-
-    @classmethod
-    def search_saleorder(cls, config: ConfigProducteca, params: SearchSalesOrderParams):
-        headers = config.headers
-        url = config.get_endpoint(cls.endpoint)
-        new_url = f"{url}?$filter={params.filter}&top={params.top}&skip={params.skip}"
-        response = requests.get(
-            new_url,
-            headers=headers,
-        )
-        return response.json(), response.status_code
-
-

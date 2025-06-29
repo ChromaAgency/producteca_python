@@ -1,7 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 import requests
 from producteca.abstract.abstract_dataclass import BaseService
+from producteca.sales_orders.search_sale_orders import SearchSalesOrderParams, SearchSalesOrder
 from dataclasses import dataclass
 import logging
 _logger = logging.getLogger(__name__)
@@ -235,6 +236,7 @@ class SaleOrder(BaseModel):
 
 @dataclass
 class SaleOrderService(BaseService):
+    endpoint: str = Field(default='salesorders', exclude=True)
 
     def get(self,  sale_order_id: int) -> "SaleOrder":
         endpoint = f'salesorders/{sale_order_id}'
@@ -273,3 +275,14 @@ class SaleOrderService(BaseService):
         if response.status_code == 200:
             return response.status_code, {}
         return response.status_code, response.json()
+
+    def search(self, params: SearchSalesOrderParams):
+        endpoint: str = f"search/{self.endpoint}"
+        headers = self.config.headers
+        url = self.config.get_endpoint(endpoint)
+        new_url = f"{url}?$filter={params.filter}&top={params.top}&skip={params.skip}"
+        response = requests.get(
+            new_url,
+            headers=headers,
+        )
+        return SearchSalesOrder(**response.json())

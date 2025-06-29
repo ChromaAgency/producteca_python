@@ -1,15 +1,13 @@
 import unittest
 from unittest.mock import patch, Mock
-from producteca.config.config import ConfigProducteca
 from producteca.sales_orders.search_sale_orders import SearchSalesOrder, SearchSalesOrderParams
+from producteca.client import ProductecaClient
 
 
 class TestSearchSalesOrder(unittest.TestCase):
+
     def setUp(self):
-        self.config = ConfigProducteca(
-            token="test_client_id",
-            api_key="test_client_secret",
-        )
+        self.client = ProductecaClient(token="test_client_id", api_key="test_client_secret")
         self.params = SearchSalesOrderParams(
             top=10,
             skip=0,
@@ -40,10 +38,9 @@ class TestSearchSalesOrder(unittest.TestCase):
         mock_response.status_code = 200
         mock_get.return_value = mock_response
 
-        response, status_code = SearchSalesOrder.search_saleorder(self.config, self.params)
+        response = self.client.SalesOrder.search(self.params)
         
         # Validate response
-        self.assertEqual(status_code, 200)
         self.assertEqual(response["count"], 1)
         self.assertEqual(len(response["results"]), 1)
         self.assertEqual(response["results"][0]["id"], "123")
@@ -63,10 +60,9 @@ class TestSearchSalesOrder(unittest.TestCase):
         mock_response.status_code = 400
         mock_get.return_value = mock_response
 
-        response, status_code = SearchSalesOrder.search_saleorder(self.config, self.params)
+        response = self.client.SalesOrder.search(self.params)
         
         # Validate error response
-        self.assertEqual(status_code, 400)
         self.assertEqual(response["error"], "Invalid request")
 
 
