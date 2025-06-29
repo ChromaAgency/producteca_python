@@ -32,37 +32,37 @@ class SalesOrderLine(BaseModel):
 
 
 class SalesOrderCard(BaseModel):
-    payment_network: str
-    first_six_digits: int
-    last_four_digits: int
-    cardholder_identification_number: str
-    cardholder_identification_type: str
-    cardholder_name: str
+    payment_network: str = Field(alias="paymentNetwork")
+    first_six_digits: int = Field(alias="firstSixDigits")
+    last_four_digits: int = Field(alias="lastFourDigits")
+    cardholder_identification_number: str = Field(alias="cardholderIdentificationNumber")
+    cardholder_identification_type: str = Field(alias="cardholderIdentificationType")
+    cardholder_name: str = Field(alias="cardholderName")
 
 
 class SalesOrderPaymentIntegration(BaseModel):
-    integration_id: str
+    integration_id: str = Field(alias="integrationId")
     app: int
 
 
 class SalesOrderPayment(BaseModel):
     date: str
     amount: float
-    coupon_amount: float
+    coupon_amount: float = Field(alias="couponAmount")
     status: str
     method: str
     integration: SalesOrderPaymentIntegration
-    transaction_fee: float
+    transaction_fee: float = Field(alias="transactionFee")
     installments: int
     card: SalesOrderCard
     notes: str
-    has_cancelable_status: bool
+    has_cancelable_status: bool = Field(alias="hasCancelableStatus")
     id: int
 
 
 class SalesOrderIntegration(BaseModel):
-    alternate_id: str
-    integration_id: int
+    alternate_id: str = Field(alias="alternateId")
+    integration_id: int = Field(alias="integrationId")
     app: int
 
 
@@ -73,8 +73,8 @@ class SalesOrderShipmentProduct(BaseModel):
 
 
 class SalesOrderShipmentMethod(BaseModel):
-    tracking_number: str
-    tracking_url: str
+    tracking_number: str = Field(alias="trackingNumber")
+    tracking_url: str = Field(alias="trackingUrl")
     courier: str
     mode: str
     cost: float
@@ -85,7 +85,7 @@ class SalesOrderShipmentMethod(BaseModel):
 
 class SalesOrderShipmentIntegration(BaseModel):
     id: int
-    integration_id: str
+    integration_id: str = Field(alias="integrationId")
     app: int
     status: str
 
@@ -99,43 +99,43 @@ class SalesOrderShipment(BaseModel):
 
 class SalesOrderResultItem(BaseModel):
     codes: List[str]
-    contact_id: int
+    contact_id: int = Field(alias="contactId")
     currency: str
     date: str
-    delivery_method: str
-    delivery_status: str
+    delivery_method: str = Field(alias="deliveryMethod")
+    delivery_status: str = Field(alias="deliveryStatus")
     id: str
-    integration_ids: List[str]
+    integration_ids: List[str] = Field(alias="integrationIds")
     integrations: List[SalesOrderIntegration]
-    invoice_integration_app: int
-    invoice_integration_id: str
+    invoice_integration_app: int = Field(alias="invoiceIntegrationApp")
+    invoice_integration_id: str = Field(alias="invoiceIntegrationId")
     lines: List[SalesOrderLine]
     payments: List[SalesOrderPayment]
-    payment_status: str
-    payment_term: str
-    product_names: List[str]
-    reserving_product_ids: str
-    sales_channel: int
+    payment_status: str = Field(alias="paymentStatus")
+    payment_term: str = Field(alias="paymentTerm")
+    product_names: List[str] = Field(alias="productNames")
+    reserving_product_ids: str = Field(alias="reservingProductIds")
+    sales_channel: int = Field(alias="salesChannel")
     shipments: List[SalesOrderShipment]
-    tracking_number: str
+    tracking_number: str = Field(alias="trackingNumber")
     skus: List[str]
     status: str
     tags: List[str]
     warehouse: str
-    company_id: int
-    shipping_cost: float
-    contact_phone: str
+    company_id: int = Field(alias="companyId")
+    shipping_cost: float = Field(alias="shippingCost")
+    contact_phone: str = Field(alias="contactPhone")
     brands: List[str]
     courier: str
-    order_id: int
-    updated_at: str
-    invoice_integration_created_at: str
-    invoice_integration_document_url: str
-    has_document_url: bool
-    integration_alternate_ids: str
-    cart_id: str
+    order_id: int = Field(alias="orderId")
+    updated_at: str = Field(alias="updatedAt")
+    invoice_integration_created_at: str = Field(alias="invoiceIntegrationCreatedAt")
+    invoice_integration_document_url: str = Field(alias="invoiceIntegrationDocumentUrl")
+    has_document_url: bool = Field(alias="hasDocumentUrl")
+    integration_alternate_ids: str = Field(alias="integrationAlternateIds")
+    cart_id: str = Field(alias="cartId")
     amount: float
-    has_any_shipments: bool
+    has_any_shipments: bool = Field(alias="hasAnyShipments")
 
 
 class SearchSalesOrder(BaseModel):

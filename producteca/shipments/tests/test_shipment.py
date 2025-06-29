@@ -22,9 +22,9 @@ class TestShipment(unittest.TestCase):
         mock_response.json.return_value = {'success': True}
         mock_post.return_value = mock_response
         # Act
-        shipment = self.client.Shipment.create(sale_order_id, payload)
+        shipment = self.client.SalesOrder.add_shipment(sale_order_id, payload)
 
-        self.assertEqual(shipment, {'success': True})
+        self.assertIsInstance(shipment, Shipment)
         mock_post.assert_called_once()
 
     @patch('requests.put')
@@ -42,9 +42,9 @@ class TestShipment(unittest.TestCase):
         mock_response.json.return_value = {'updated': True}
         mock_put.return_value = mock_response
 
-        shipment = self.client.Shipment.update(sale_order_id, shipment_id, payload)
+        shipment = self.client.SalesOrder.update_shipment(sale_order_id, shipment_id, payload)
 
-        self.assertEqual(shipment, {'updated': True})
+        self.assertIsInstance(shipment, Shipment)
         mock_put.assert_called_once()
 
 

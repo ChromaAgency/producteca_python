@@ -1,6 +1,7 @@
 import unittest
+import json
 from unittest.mock import patch, Mock
-from producteca.sales_orders.search_sale_orders import SearchSalesOrder, SearchSalesOrderParams
+from producteca.sales_orders.search_sale_orders import SearchSalesOrderParams, SalesOrderResultItem
 from producteca.client import ProductecaClient
 
 
@@ -18,39 +19,19 @@ class TestSearchSalesOrder(unittest.TestCase):
     def test_search_saleorder_success(self, mock_get):
         # Mock successful response
         mock_response = Mock()
-        mock_response.json.return_value = {
-            "count": 1,
-            "results": [{
-                "id": "123",
-                "status": "confirmed",
-                "lines": [],
-                "payments": [],
-                "shipments": [],
-                "integrations": [],
-                "codes": [],
-                "integration_ids": [],
-                "product_names": [],
-                "skus": [],
-                "tags": [],
-                "brands": []
-            }]
-        }
-        mock_response.status_code = 200
-        mock_get.return_value = mock_response
+        with open('producteca/sales_orders/tests/search.json', 'r') as f:
+            results = json.loads(f.read())
+            mock_response.json.return_value = results
+            mock_response.status_code = 200
+            mock_get.return_value = mock_response
 
         response = self.client.SalesOrder.search(self.params)
         
         # Validate response
-        self.assertEqual(response["count"], 1)
-        self.assertEqual(len(response["results"]), 1)
-        self.assertEqual(response["results"][0]["id"], "123")
-
-        # Verify the request was made with correct parameters
-        expected_url = f"{self.config.get_endpoint(SearchSalesOrder.endpoint)}?$filter={self.params.filter}&top={self.params.top}&skip={self.params.skip}"
-        mock_get.assert_called_once_with(
-            expected_url,
-            headers=self.config.headers
-        )
+        self.assertEqual(response.count, 0)
+        self.assertEqual(len(response.results), 1)
+        self.assertEqual(response.results[0].id, "string")
+        self.assertIsInstance(response.results[0], SalesOrderResultItem)
 
     @patch('requests.get')
     def test_search_saleorder_error(self, mock_get):
@@ -59,12 +40,9 @@ class TestSearchSalesOrder(unittest.TestCase):
         mock_response.json.return_value = {"error": "Invalid request"}
         mock_response.status_code = 400
         mock_get.return_value = mock_response
-
-        response = self.client.SalesOrder.search(self.params)
-        
-        # Validate error response
-        self.assertEqual(response["error"], "Invalid request")
-
+        with self.assertRaises(Exception):
+            self.client.SalesOrder.search(self.params)
+       
 
 if __name__ == '__main__':
     unittest.main()

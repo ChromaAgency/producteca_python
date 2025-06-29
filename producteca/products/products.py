@@ -144,15 +144,19 @@ class MeliProduct(Product):
 
 
 @dataclass
-class ProductService(BaseService):
+class ProductService(BaseService[Product]):
     endpoint: str = Field(default='products', exclude=True)
     create_if_it_doesnt_exist: bool = Field(default=False, exclude=True)
+
+    def __call__(self, **payload):
+        self._record = Product(**payload)
+        return self
 
     def create(self):
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/synchronize')
         headers = self.config.headers.copy()
         headers.update({"createifitdoesntexist": str(self.create_if_it_doesnt_exist).lower()})
-        data = self.model_dump_json(by_alias=True, exclude_none=True)
+        data = self._record.model_dump_json(by_alias=True, exclude_none=True)
         response = requests.post(endpoint_url, data=data, headers=headers)
         if response.status_code == 204:
             raise Exception("Product does not exist and the request cant create if it does not exist")
@@ -162,8 +166,8 @@ class ProductService(BaseService):
         # TODO: Change name to synchronize
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/synchronize')
         headers = self.config.headers.copy()
-        data = self.model_dump_json(by_alias=True, exclude_none=True)
-        if not self.code and not self.sku:
+        data = self._record.model_dump_json(by_alias=True, exclude_none=True)
+        if not self._record.code and not self._record.sku:
             raise "Sku or code should be provided to update the product"
         response = requests.post(endpoint_url, data=data, headers=headers)
         if response.status_code == 204:

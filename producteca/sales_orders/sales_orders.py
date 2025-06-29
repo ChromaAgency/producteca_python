@@ -3,6 +3,8 @@ from typing import List, Optional
 import requests
 from producteca.abstract.abstract_dataclass import BaseService
 from producteca.sales_orders.search_sale_orders import SearchSalesOrderParams, SearchSalesOrder
+from producteca.payments.payments import Payment
+from producteca.shipments.shipment import Shipment
 from dataclasses import dataclass
 import logging
 _logger = logging.getLogger(__name__)
@@ -235,8 +237,12 @@ class SaleOrder(BaseModel):
 
 
 @dataclass
-class SaleOrderService(BaseService):
+class SaleOrderService(BaseService[SaleOrder]):
     endpoint: str = Field(default='salesorders', exclude=True)
+
+    def __call__(self, **payload):
+        self._record = SaleOrder(**payload)
+        return self
 
     def get(self,  sale_order_id: int) -> "SaleOrder":
         endpoint = f'salesorders/{sale_order_id}'
@@ -285,4 +291,26 @@ class SaleOrderService(BaseService):
             new_url,
             headers=headers,
         )
+        if not response.ok:
+            raise Exception(f"Error on resposne {response.text}")
         return SearchSalesOrder(**response.json())
+
+    def add_payment(self, sale_order_id: int, payload: "Payment") -> "Payment":
+        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/payments")
+        res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        return Payment(**res.json())
+
+    def update_payment(self, sale_order_id: int, payment_id: int, payload: "Payment") -> "Payment":
+        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/payments/{payment_id}")
+        res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        return Payment(**res.json())
+
+    def add_shipment(self, sale_order_id: int, payload: "Shipment") -> "Shipment":
+        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/shipments")
+        res = requests.post(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        return Shipment(**res.json())
+
+    def update_shipment(self, sale_order_id: int, shipment_id: str, payload: "Shipment") -> "Shipment":
+        url = self.config.get_endpoint(f"{self.endpoint}/{sale_order_id}/shipments/{shipment_id}")
+        res = requests.put(url, data=payload.model_dump_json(exclude_none=True), headers=self.config.headers)
+        return Shipment(**res.json())

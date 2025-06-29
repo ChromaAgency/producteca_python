@@ -1,8 +1,6 @@
 from producteca.config.config import ConfigProducteca
 from producteca.products.products import ProductService
 from producteca.sales_orders.sales_orders import SaleOrderService
-from producteca.shipments.shipment import ShipmentService
-from producteca.payments.payments import PaymentService
 import os
 
 
@@ -22,11 +20,3 @@ class ProductecaClient:
     @property
     def SalesOrder(self):
         return SaleOrderService(self.config)
-
-    @property
-    def Shipment(self):
-        return ShipmentService(self.config)
-
-    @property
-    def Payment(self):
-        return PaymentService(self.config)

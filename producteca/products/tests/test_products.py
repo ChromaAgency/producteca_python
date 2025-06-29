@@ -22,10 +22,9 @@ class TestProduct(unittest.TestCase):
         mock_response.json.return_value = self.test_product.model_dump()
         mock_post.return_value = mock_response
 
-        response, status_code = self.client.Product.create()
+        response = self.client.Product(**self.test_product.model_dump()).create()
         
-        self.assertEqual(status_code, 200)
-        self.assertEqual(response["sku"], "TEST001")
+        self.assertEqual(response.sku, "TEST001")
 
     @patch('requests.post')
     def test_create_product_not_exist(self, mock_post):
@@ -45,7 +44,7 @@ class TestProduct(unittest.TestCase):
         mock_response.json.return_value = self.test_product.model_dump()
         mock_post.return_value = mock_response
 
-        response = self.client.Product.update()
+        response = self.client.Product(**self.test_product.model_dump()).update()
         
         self.assertEqual(response.name, "Test Product")
 
@@ -71,9 +70,8 @@ class TestProduct(unittest.TestCase):
         mock_response.json.return_value = test_prod
         mock_get.return_value = mock_response
 
-        product, status_code = self.client.Product.get_bundle(1)
+        product = self.client.Product.get_bundle(1)
         
-        self.assertEqual(status_code, 200)
         self.assertEqual(product.sku, "TEST001")
 
     @patch('requests.get')
