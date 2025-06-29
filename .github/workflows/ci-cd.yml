@@ -12,29 +12,74 @@ on:
     branches:
       - main
 jobs:
-  build:
-    name: Build distribution 📦
-    runs-on: ubuntu-latest
 
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.13"]
+        poetry-version: [ "1.7.1"]
+        os: [ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
-    - name: Install pypa/build
-      run: >-
-        python3 -m
-        pip install
-        build
-        --user
-    - name: Build a binary wheel and a source tarball
-      run: python3 -m build
-    - name: Store the distribution packages
-      uses: actions/upload-artifact@v4
-      with:
-        name: python-package-distributions
-        path: dist/
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: Install deps
+        run: poetry install
+      - name: Run tests
+        run: poetry run test
+      - name: Run coverage report
+        run: poetry run get_coverage
+      - name: Commit report
+        continue-on-error: true
+        run: |
+          git status
+          git config --global user.name 'Git bot'
+          git config --global user.email 'gitbot@users.noreply.github.com'
+          git fetch origin
+          git checkout --track origin/${{github.event.pull_request.head.ref}}
+          git pull 
+          git commit -am "Automated coverage report"
+          git push 
+  coverage:
+    runs-on: ubuntu-latest
+    needs: ci 
+    steps:
+      - uses: actions/checkout@v4
+      - uses: paambaati/codeclimate-action@v9.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with: 
+          coverageLocations: ${{github.workspace}}/coverage.xml:coverage.py
+      
+    # name: Build distribution 📦
+    # runs-on: ubuntu-latest
+
+    # steps:
+    # - uses: actions/checkout@v4
+    # - name: Set up Python
+    #   uses: actions/setup-python@v4
+    #   with:
+    #     python-version: "3.10"
+    # - name: Install pypa/build
+    #   run: >-
+    #     python3 -m
+    #     pip install
+    #     build
+    #     --user
+    # - name: Build a binary wheel and a source tarball
+    #   run: python3 -m build
+    # - name: Store the distribution packages
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: python-package-distributions
+    #     path: dist/
   publish-to-pypi:
     name: >-
       Publish Python 🐍 distribution 📦 to PyPI
