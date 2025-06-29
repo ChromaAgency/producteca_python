@@ -42,7 +42,7 @@ jobs:
       - name: Push changes
         run: |
           git status
-          git commit -am "Automated coverage report"
+          git commit -am "Version Bump"
           git push 
       - name: Run build
         run: poetry build
