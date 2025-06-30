@@ -208,7 +208,7 @@ class SaleOrderInvoiceIntegrationPut(SaleOrderInvoiceIntegrationAbstract):
 class SaleOrder(BaseModel):
     tags: Optional[List[str]] = None
     integrations: Optional[List[SaleOrderIntegrationId]] = None
-    invoice_integration: SaleOrderInvoiceIntegration = Field(alias="invoiceIntegration")
+    invoice_integration: Optional[SaleOrderInvoiceIntegration] = Field(None, alias="invoiceIntegration")
     channel: Optional[str] = None
     pii_expired: Optional[bool] = Field(None, alias="piiExpired")
     contact: Optional[SaleOrderContact] = None
