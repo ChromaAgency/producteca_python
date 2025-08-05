@@ -1,14 +1,14 @@
 from abc import ABC
 from ..config.config import ConfigProducteca
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Any
 
 
 @dataclass
-class BaseService[T](ABC):
+class BaseService(ABC):
     config: ConfigProducteca
     endpoint: str
-    _record: Optional[T] = None
+    _record: Optional[Any] = None
     
     def __repr__(self):
         return repr(self._record)
