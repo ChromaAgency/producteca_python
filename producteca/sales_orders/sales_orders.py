@@ -264,7 +264,7 @@ class SaleOrderSyncResponse(BaseModel):
 
 
 @dataclass
-class SaleOrderService(BaseService[SaleOrder]):
+class SaleOrderService(BaseService):
     endpoint: str = 'salesorders'
 
     def __call__(self, **payload):

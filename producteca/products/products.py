@@ -244,7 +244,7 @@ class ListedSynchronizeResponse(BaseModel):
 
 
 @dataclass
-class ProductService(BaseService[Product]):
+class ProductService(BaseService):
     endpoint: str = 'products'
     create_if_it_doesnt_exist: bool = Field(default=False, exclude=True)
 
