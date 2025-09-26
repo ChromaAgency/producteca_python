@@ -107,8 +107,13 @@ class SaleOrderProduct(BaseModel):
     id: int
 
 
+class SaleOrderQuestion(BaseModel):
+    text: Optional[str] = None
+    answer: Optional[str] = None
+
+
 class SaleOrderConversation(BaseModel):
-    questions: Optional[List[str]] = None
+    questions: Optional[List[SaleOrderQuestion]] = None
 
 
 class SaleOrderLine(BaseModel):
