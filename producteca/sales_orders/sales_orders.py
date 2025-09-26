@@ -205,6 +205,12 @@ class SaleOrderInvoiceIntegrationPut(SaleOrderInvoiceIntegrationAbstract):
     xml_url: str = Field(alias="xmlUrl")
 
 
+class SaleOrderWarehouseIntegration(BaseModel):
+    app: Optional[int] = None
+    status: Optional[str] = None
+    integration_id: Optional[str] = Field(None, alias="integrationId")
+
+
 class SaleOrder(BaseModel):
     tags: Optional[List[str]] = None
     integrations: Optional[List[SaleOrderIntegrationId]] = None
@@ -215,7 +221,7 @@ class SaleOrder(BaseModel):
     lines: Optional[List[SaleOrderLine]] = None
     warehouse: Optional[str] = None
     warehouse_id: Optional[int] = Field(None, alias="warehouseId")
-    warehouse_integration: Optional[str] = Field(None, alias="warehouseIntegration")
+    warehouse_integration: Optional[SaleOrderWarehouseIntegration] = Field(None, alias="warehouseIntegration")
     pick_up_store: Optional[str] = Field(None, alias="pickUpStore")
     payments: Optional[List[SaleOrderPayment]] = None
     shipments: Optional[List[SaleOrderShipment]] = None
