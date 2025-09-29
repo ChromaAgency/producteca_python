@@ -197,7 +197,7 @@ class SaleOrderInvoiceIntegrationAbstract(BaseModel):
     integration_id: str = Field(alias="integrationId")
     app: int
     created_at: str = Field(alias="createdAt")
-    decrease_stock: bool = Field(alias="decreaseStock")
+    decrease_stock: Optional[bool] = Field(None, alias="decreaseStock")
 
 
 class SaleOrderInvoiceIntegration(SaleOrderInvoiceIntegrationAbstract):
