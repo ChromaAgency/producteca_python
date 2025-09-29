@@ -193,11 +193,11 @@ class SaleOrderShipment(BaseModel):
 
 
 class SaleOrderInvoiceIntegrationAbstract(BaseModel):
-    id: Optional[int] = None
+    id: int
     integration_id: str = Field(alias="integrationId")
-    app: Optional[int] = None
-    created_at: Optional[str] = Field(None, alias="createdAt")
-    decrease_stock: Optional[bool] = Field(None, alias="decreaseStock")
+    app: int
+    created_at: str = Field(alias="createdAt")
+    decrease_stock: bool = Field(alias="decreaseStock")
 
 
 class SaleOrderInvoiceIntegration(SaleOrderInvoiceIntegrationAbstract):
