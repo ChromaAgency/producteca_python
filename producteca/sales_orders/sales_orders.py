@@ -206,9 +206,8 @@ class SaleOrderInvoiceIntegration(SaleOrderInvoiceIntegrationAbstract):
 
 
 class SaleOrderInvoiceIntegrationPut(SaleOrderInvoiceIntegrationAbstract):
-    document_url: str = Field(alias="documentUrl")
-    xml_url: str = Field(alias="xmlUrl")
-
+    document_url: Optional[str] = Field(None, alias="documentUrl")
+    xml_url: Optional[str] = Field(None, alias="xmlUrl")
 
 class SaleOrderWarehouseIntegration(BaseModel):
     app: Optional[int] = None
