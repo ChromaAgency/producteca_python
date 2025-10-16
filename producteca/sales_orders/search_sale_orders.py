@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 class SalesOrderProduct(BaseModel):
     id: int
     name: str
-    code: str
+    code: Optional[str] = None
     brand: Optional[str] = None
 
 
@@ -20,8 +20,8 @@ class SalesOrderVariationAttribute(BaseModel):
 class SalesOrderVariation(BaseModel):
     id: int
     attributes: Optional[List[SalesOrderVariationAttribute]] = None
-    sku: str
-    thumbnail: str
+    sku: Optional[str] = None
+    thumbnail: Optional[str] = None
 
 
 class SalesOrderLine(BaseModel):
