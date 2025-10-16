@@ -251,6 +251,7 @@ class SaleOrder(BaseModel):
     has_any_payments: Optional[bool] = Field(None, alias="hasAnyPayments")
     date: Optional[str] = None
     notes: Optional[str] = None
+    courier: Optional[str] = None
     id: int
 
 
