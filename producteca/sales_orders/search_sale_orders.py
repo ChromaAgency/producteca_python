@@ -13,20 +13,20 @@ class SalesOrderProduct(BaseModel):
 
 
 class SalesOrderVariationAttribute(BaseModel):
-    key: str
-    value: str
+    key: Optional[str] = None
+    value: Optional[str] = None
 
 
 class SalesOrderVariation(BaseModel):
     id: int
-    attributes: List[SalesOrderVariationAttribute]
+    attributes: Optional[List[SalesOrderVariationAttribute]] = None
     sku: str
     thumbnail: str
 
 
 class SalesOrderLine(BaseModel):
     product: SalesOrderProduct
-    variation: SalesOrderVariation
+    variation: Optional[SalesOrderVariation] = None
     quantity: int
     price: float
 
@@ -74,13 +74,13 @@ class SalesOrderShipmentProduct(BaseModel):
 
 class SalesOrderShipmentMethod(BaseModel):
     tracking_number: Optional[str] = Field(alias="trackingNumber")
-    tracking_url: str = Field(alias="trackingUrl")
-    courier: str
+    tracking_url: Optional[str] = Field(alias="trackingUrl")
+    courier: Optional[str] = None
     mode: Optional[str] = None
-    cost: float
-    type: str
+    cost: Optional[float] = None
+    type: Optional[str] = None
     eta: Optional[Union[int, str]] = Field(None)
-    status: str
+    status: Optional[str] = None
 
 
 class SalesOrderShipmentIntegration(BaseModel):
@@ -110,13 +110,13 @@ class SalesOrderResultItem(BaseModel):
     invoice_integration_app: Optional[int] = Field(default=None, alias="invoiceIntegrationApp")
     invoice_integration_id: Optional[str] = Field(default=None, alias="invoiceIntegrationId")
     lines: List[SalesOrderLine]
-    payments: List[SalesOrderPayment]
+    payments: Optional[List[SalesOrderPayment]] = None
     payment_status: str = Field(alias="paymentStatus")
     payment_term: str = Field(alias="paymentTerm")
     product_names: List[str] = Field(alias="productNames")
     reserving_product_ids: Union[str, List[str]] = Field(alias="reservingProductIds")
     sales_channel: int = Field(alias="salesChannel")
-    shipments: List[SalesOrderShipment]
+    shipments: Optional[List[SalesOrderShipment]] = None
     tracking_number: Optional[str] = Field(alias="trackingNumber")
     skus: List[str]
     status: str
@@ -126,7 +126,7 @@ class SalesOrderResultItem(BaseModel):
     shipping_cost: float = Field(alias="shippingCost")
     contact_phone: Optional[str] = Field(default=None, alias="contactPhone")
     brands: List[str]
-    courier: str
+    courier: Optional[str] = None
     order_id: int = Field(alias="orderId")
     updated_at: str = Field(alias="updatedAt")
     invoice_integration_created_at: Optional[str] = Field(default=None, alias="invoiceIntegrationCreatedAt")
