@@ -289,7 +289,7 @@ class SaleOrderService(BaseService):
         url = self.config.get_endpoint(endpoint)
         response = requests.get(url, headers=self.config.headers)
         if not response.ok:
-            raise Exception(f"Order {sale_order_id} could not be fetched")
+            raise Exception(f"Order {sale_order_id} could not be fetched. Error {response.status_code} {response.text}")
         response_data = response.json()
         return self(**response_data)
 
