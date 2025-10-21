@@ -56,24 +56,24 @@ class SearchDeals(BaseModel):
 class SearchResultItem(BaseModel):
     search_score: float = Field(..., alias='@search.score')
     id: int
-    product_id: int = Field(..., alias='productId')
-    company_id: int = Field(..., alias='companyId')
-    name: str
-    code: str
+    product_id: Optional[int] = Field(None, alias='productId')
+    company_id: Optional[int] = Field(None, alias='companyId')
+    name:Optional[str] = None
+    code: Optional[str] = None
     skus: List[str]
-    brand: str
-    category: str
-    thumbnail: str
-    stocks: List[SearchStocks]
-    warehouses_with_stock: List[str] = Field(..., alias='warehousesWithStock')
-    total_stock: int = Field(..., alias='totalStock')
-    has_pictures: bool = Field(..., alias='hasPictures')
-    buying_price: float = Field(..., alias='buyingPrice')
-    prices: List[SearchPrices]
-    integration_ids: List[str] = Field(..., alias='integrationIds')
-    integration_apps: List[str] = Field(..., alias='integrationApps')
-    integrations: List[SearchIntegration]
-    campaigns: List[str]
+    brand: Optional[str] = None
+    category: Optional[str] = None
+    thumbnail: Optional[str] = None
+    stocks: Optional[List[SearchStocks]] = None
+    warehouses_with_stock: Optional[List[str]] = Field(None, alias='warehousesWithStock')
+    total_stock: Optional[int] = Field(None, alias='totalStock')
+    has_pictures: Optional[bool] = Field(None, alias='hasPictures')
+    buying_price: Optional[float] = Field(None, alias='buyingPrice')
+    prices: Optional[List[SearchPrices]] = None
+    integration_ids: Optional[List[str]] = Field(None, alias='integrationIds')
+    integration_apps: Optional[List[str]] = Field(None, alias='integrationApps')
+    integrations: Optional[List[SearchIntegration]] = None
+    campaigns: Optional[List[str]] = None
     app: Optional[int] = None
     status: Optional[str] = None
     synchronize_stock: Optional[bool] = Field(None, alias='synchronizeStock')
@@ -104,7 +104,7 @@ class SearchResultItem(BaseModel):
     attribute_completion_status: Optional[str] = Field(None, alias='attributeCompletionStatus')
     attribute_completion_count: Optional[int] = Field(None, alias='attributeCompletionCount')
     attribute_completion_total: Optional[int] = Field(None, alias='attributeCompletionTotal')
-    deals: Optional[SearchDeals] = None
+    deals: Optional[SearchDeals] = []
     campaign_status: Optional[List[str]] = Field(None, alias='campaignStatus')
     size_chart: Optional[str] = Field(None, alias='sizeChart')
     channel_status: Optional[List[str]] = Field(None, alias='channelStatus')
