@@ -104,7 +104,7 @@ class SearchResultItem(BaseModel):
     attribute_completion_status: Optional[str] = Field(None, alias='attributeCompletionStatus')
     attribute_completion_count: Optional[int] = Field(None, alias='attributeCompletionCount')
     attribute_completion_total: Optional[int] = Field(None, alias='attributeCompletionTotal')
-    deals: Optional[SearchDeals] = []
+    deals: Optional[Union[SearchDeals, List]] = None
     campaign_status: Optional[List[str]] = Field(None, alias='campaignStatus')
     size_chart: Optional[str] = Field(None, alias='sizeChart')
     channel_status: Optional[List[str]] = Field(None, alias='channelStatus')
