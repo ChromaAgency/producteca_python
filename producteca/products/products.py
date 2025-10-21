@@ -266,31 +266,30 @@ class ProductService(BaseService):
             raise Exception(f"Error getting product {product_variation.sku} - {product_variation.code}\n {response.text}")
         if response.status_code == 204:
             raise Exception("Status code is 204, meaning nothing was updated or created")
+        
+        _logger.info(f"response text: {response.text}")
         response_data = response.json()
-        try:
-            return Product(**response_data)
-        except ValidationError:
-            pass
+        _logger.debug(f"Response data: {response_data}")
         if isinstance(response_data, list):
             res = ListedSynchronizeResponse(results=response_data)
-            if any([r.error_context for r in res.results]):
+            if res.results and hasattr(res.results[0], 'error_context') and res.results[0].error_context:
                 raise Exception(f"Errored while updating {res.results[0].error_context} {res.model_dump_json()}")
-            else:
-                return res.results[0]
-        else:
-            try:
-                sync_resp = SynchronizeResponse(**response_data)
-                if sync_resp.error_context:
-                    raise Exception(f"Errored while updating {sync_resp.error_context} - {sync_resp.model_dump_json()}")
-                else:
-                    return sync_resp
-            except ValidationError:
-                try:
-                    error_res = ErrorReason(**response_data)
-                    raise Exception(f"Errored with the following message {error_res.message} - {error_res.model_dump_json()}")
-                except ValidationError:
-                    pass
-        raise Exception(f"Unhandled error, check response {response.text}")
+            return res.results[0] if res.results else None
+
+        if isinstance(response_data, dict) and 'name' in response_data:
+            return Product(**response_data)
+
+        if isinstance(response_data, dict) and any(key in response_data for key in ['product', 'variation', 'statusCode']):
+            sync_resp = SynchronizeResponse(**response_data)
+            if sync_resp.error_context:
+                raise Exception(f"Errored while updating {sync_resp.error_context} - {sync_resp.model_dump_json()}")
+            return sync_resp
+
+        if isinstance(response_data, dict) and 'message' in response_data:
+            error_res = ErrorReason(**response_data)
+            raise Exception(f"Errored with the following message {error_res.message} - {error_res.model_dump_json()}")
+        
+        raise Exception(f"Unhandled response format, check response {response.text}")
 
     def get(self, product_id: int) -> "ProductService":
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}')
