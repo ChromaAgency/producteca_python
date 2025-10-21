@@ -64,15 +64,15 @@ class SearchResultItem(BaseModel):
     brand: Optional[str] = None
     category: Optional[str] = None
     thumbnail: Optional[str] = None
-    stocks: Optional[List[SearchStocks]] = None
+    stocks: Optional[Union[List[SearchStocks], List]] = None
     warehouses_with_stock: Optional[List[str]] = Field(None, alias='warehousesWithStock')
     total_stock: Optional[int] = Field(None, alias='totalStock')
     has_pictures: Optional[bool] = Field(None, alias='hasPictures')
     buying_price: Optional[float] = Field(None, alias='buyingPrice')
-    prices: Optional[List[SearchPrices]] = None
+    prices: Optional[Union[List[SearchPrices], List]] = None
     integration_ids: Optional[List[str]] = Field(None, alias='integrationIds')
     integration_apps: Optional[List[str]] = Field(None, alias='integrationApps')
-    integrations: Optional[List[SearchIntegration]] = None
+    integrations: Optional[Union[List[SearchIntegration], List]] = None
     campaigns: Optional[List[str]] = None
     app: Optional[int] = None
     status: Optional[str] = None
