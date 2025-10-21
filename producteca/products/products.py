@@ -69,13 +69,13 @@ class Integration(BaseModel):
 class Variation(BaseModel):
     variation_id: Optional[int] = Field(default=None, alias='variationId')
     components: Optional[List] = None
-    pictures: Optional[List[Picture]] = None
-    stocks: Optional[List[Stock]] = None
+    pictures: Optional[Union[List[Picture], List]] = None
+    stocks: Optional[Union[List[Stock], List]] = None
     attributes_hash: Optional[str] = Field(default=None, alias='attributesHash')
     primary_color: Optional[str] = Field(default=None, alias='primaryColor')
     thumbnail: Optional[str] = None
-    attributes: Optional[List[Attribute]] = None
-    integrations: Optional[List[Integration]] = None
+    attributes: Optional[Union[List[Attribute], List]] = None
+    integrations: Optional[Union[List[Integration], List]] = None
     id: Optional[int] = None
     sku: Optional[str] = None
     barcode: Optional[str] = None
@@ -96,34 +96,34 @@ class BundleComponent(BaseModel):
 
 class BundleVariation(BaseModel):
     variation_id: int = Field(alias='variationId')
-    components: List[BundleComponent]
+    components: Union[List[BundleComponent], List]
 
 
 class BundleResult(BaseModel):
     company_id: int = Field(alias='companyId')
     product_id: int = Field(alias='productId')
-    variations: List[BundleVariation]
+    variations: Union[List[BundleVariation], List]
     id: str
 
 
 class BundleResponse(BaseModel):
-    results: List[BundleResult]
+    results: Union[List[BundleResult], List]
     count: int
 
 
 class Product(BaseModel):
-    integrations: Optional[List[Integration]] = None
-    variations: Optional[List[Variation]] = None
+    integrations: Optional[Union[List[Integration], List]] = None
+    variations: Optional[Union[List[Variation], List]] = None
     is_simple: Optional[bool] = Field(default=None, alias='isSimple')
     has_variations: Optional[bool] = Field(default=None, alias='hasVariations') 
     thumbnail: Optional[str] = None
     category: Optional[str] = None
     notes: Optional[str] = None
-    prices: Optional[List[Price]] = None
+    prices: Optional[Union[List[Price], List]] = None
     buying_price: Optional[float] = Field(default=None, alias='buyingPrice')
     is_archived: Optional[bool] = Field(default=None, alias='isArchived')
-    dimensions: Optional[Dimensions] = None
-    attributes: Optional[List[Attribute]] = None
+    dimensions: Optional[Union[Dimensions, dict]] = None
+    attributes: Optional[Union[List[Attribute], List]] = None
     metadata: Optional[List[str]] = None
     is_original: Optional[bool] = Field(default=None, alias='isOriginal')
     name: str
@@ -138,16 +138,16 @@ class ProductVariationBase(BaseModel):
     variation_id: Optional[int] = Field(default=None, alias='variationId')
     code: Optional[str] = None
     barcode: Optional[str] = None
-    attributes: List[Attribute] = []
+    attributes: Union[List[Attribute], List] = []
     tags: Optional[List[str]] = []
     buying_price: Optional[float] = Field(0, alias='buyingPrice')
-    dimensions: Optional[Dimensions] = Field(default_factory=Dimensions)
+    dimensions: Optional[Union[Dimensions, dict]] = Field(default_factory=Dimensions)
     brand: Optional[str] = ''
     notes: Optional[str] = ''
-    deals: Optional[List[Deal]] = []
-    stocks: List[Stock]
-    prices: Optional[List[Price]] = []
-    pictures: Optional[List[Picture]] = []
+    deals: Optional[Union[List[Deal], List]] = []
+    stocks: Optional[Union[List[Stock], List]] = []
+    prices: Optional[Union[List[Price], List]] = []
+    pictures: Optional[Union[List[Picture], List]] = []
 
 
 class ProductVariation(ProductVariationBase):
@@ -180,11 +180,11 @@ class MeliProduct(BaseModel):
     product_id: Optional[int] = Field(default=None, alias='productId')
     tags: Optional[List[str]] = Field(default=None)
     has_custom_shipping_costs: Optional[bool] = Field(default=None, alias='hasCustomShippingCosts')
-    shipping: Optional[Shipping] = None
-    mshops_shipping: Optional[MShopsShipping] = Field(default=None, alias='mShopsShipping')
+    shipping: Optional[Union[Shipping, dict]] = None
+    mshops_shipping: Optional[Union[MShopsShipping, dict]] = Field(default=None, alias='mShopsShipping')
     add_free_shipping_cost_to_price: Optional[bool] = Field(default=None, alias='addFreeShippingCostToPrice')
-    category: MeliCategory
-    attribute_completion: Optional[AttributeCompletion] = Field(default=None, alias='attributeCompletion')
+    category: Union[MeliCategory, dict]
+    attribute_completion: Optional[Union[AttributeCompletion, dict]] = Field(default=None, alias='attributeCompletion')
     catalog_products: Optional[List[str]] = Field(default=None, alias='catalogProducts')
     warranty: Optional[str] = None
     domain: Optional[str] = None
@@ -211,8 +211,8 @@ class ResolvedValue(BaseModel):
 
 class ResolvedError(BaseModel):
     resolved: Optional[bool] = None
-    reason: Optional[ErrorReason] = None
-    value: Optional[ResolvedValue] = None
+    reason: Optional[Union[ErrorReason, dict]] = None
+    value: Optional[Union[ResolvedValue, dict]] = None
     statusCode: Optional[int] = None
 
 
@@ -227,20 +227,20 @@ class ErrorContext(BaseModel):
 
 
 class SynchronizeResponse(BaseModel):
-    product: Optional[ResolvedError] = None
-    variation: Optional[ResolvedError] = None
-    deals: Optional[ResolvedError] = None
-    bundles: Optional[ResolvedError] = None
-    taxes: Optional[ResolvedError] = None
-    meliProductListingIntegrations: Optional[ResolvedError] = None
-    tags: Optional[ResolvedError] = None
-    productIntegrations: Optional[ResolvedError] = None
+    product: Optional[Union[ResolvedError, dict]] = None
+    variation: Optional[Union[ResolvedError, dict]] = None
+    deals: Optional[Union[ResolvedError, dict]] = None
+    bundles: Optional[Union[ResolvedError, dict]] = None
+    taxes: Optional[Union[ResolvedError, dict]] = None
+    meliProductListingIntegrations: Optional[Union[ResolvedError, dict]] = None
+    tags: Optional[Union[ResolvedError, dict]] = None
+    productIntegrations: Optional[Union[ResolvedError, dict]] = None
     statusCode: Optional[int] = None
-    error_context: Optional[ErrorContext] = Field(None, alias='error@context')
+    error_context: Optional[Union[ErrorContext, dict]] = Field(None, alias='error@context')
 
 
 class ListedSynchronizeResponse(BaseModel):
-    results: List[SynchronizeResponse]
+    results: Union[List[SynchronizeResponse], List]
 
 
 @dataclass
