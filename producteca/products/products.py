@@ -264,8 +264,8 @@ class ProductService(BaseService):
         response = requests.post(endpoint_url, json=data, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting product {product_variation.sku} - {product_variation.code}\n {response.text}")
-        if response.status_code == 204:
-            raise Exception("Status code is 204, meaning nothing was updated or created")
+        # if response.status_code == 204:
+        #     raise Exception("Status code is 204, meaning nothing was updated or created")
         
         _logger.info(f"response text: {response.text}")
         response_data = response.json()
