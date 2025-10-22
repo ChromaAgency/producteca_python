@@ -152,7 +152,7 @@ class ProductVariationBase(BaseModel):
 
 class ProductVariation(ProductVariationBase):
     category: Optional[str] = Field(default=None)
-    name: str
+    name: Optional[str] = None
 
 
 class Shipping(BaseModel):
