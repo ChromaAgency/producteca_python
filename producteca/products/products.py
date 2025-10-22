@@ -264,13 +264,15 @@ class ProductService(BaseService):
         response = requests.post(endpoint_url, json=data, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting product {product_variation.sku} - {product_variation.code}\n {response.text}")
-        if response.status_code == 204:
+        if response.status_code == 204 and product_variation.prices:
             # 204 significa que la operación fue exitosa pero no hubo cambios
             return SynchronizeResponse(
                 statusCode=204,
                 product={"resolved": True, "statusCode": 204},
                 variation={"resolved": True, "statusCode": 204}
             )
+        if response.status_code == 204:
+            raise Exception("No content to process in the response, nothing modified.")
         
         _logger.info(f"response text: {response.text}")
         response_data = response.json()
