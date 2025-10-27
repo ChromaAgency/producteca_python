@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, ValidationError
 from dataclasses import dataclass
 from producteca.abstract.abstract_dataclass import BaseService
 from producteca.products.search_products import SearchProduct, SearchProductParams
+from producteca.utils import clean_model_dump
 import logging
 import requests
 
@@ -140,7 +141,7 @@ class ProductVariationBase(BaseModel):
     barcode: Optional[str] = None
     attributes: Union[List[Attribute], List] = []
     tags: Optional[List[str]] = []
-    buying_price: Optional[float] = Field(0, alias='buyingPrice')
+    buying_price: Optional[float] = Field(default=None, alias='buyingPrice')
     dimensions: Optional[Union[Dimensions, dict]] = Field(default_factory=Dimensions)
     brand: Optional[str] = ''
     notes: Optional[str] = ''
@@ -253,14 +254,15 @@ class ProductService(BaseService):
         return self
 
     def synchronize(self, payload) -> Union[Product, SynchronizeResponse]:
-
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/synchronize')
         headers = self.config.headers.copy()
         headers.update({"createifitdoesntexist": str(self.create_if_it_doesnt_exist).lower()})
         product_variation = ProductVariation(**payload)
         if not product_variation.code and not product_variation.sku:
             raise Exception("Sku or code should be provided to update the product")
-        data = product_variation.model_dump(by_alias=True, exclude_none=True)
+        # Hacer model_dump con limpieza automática de valores vacíos
+        data = clean_model_dump(product_variation)
+        _logger.info(f"Synchronizing product: {data}")
         response = requests.post(endpoint_url, json=data, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting product {product_variation.sku} - {product_variation.code}\n {response.text}")
@@ -321,7 +323,7 @@ class ProductService(BaseService):
         endpoint: str = f'search/{self.endpoint}'
         headers = self.config.headers
         url = self.config.get_endpoint(endpoint)
-        response = requests.get(url, headers=headers, params=params.model_dump(by_alias=True, exclude_none=True))
+        response = requests.get(url, headers=headers, params=clean_model_dump(params))
         if not response.ok:
             raise Exception(f"error in searching products {response.text}")
         return SearchProduct(**response.json())

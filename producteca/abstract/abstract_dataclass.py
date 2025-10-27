@@ -1,5 +1,6 @@
 from abc import ABC
 from ..config.config import ConfigProducteca
+from ..utils import clean_model_dump
 from dataclasses import dataclass
 from typing import Optional, Any
 
@@ -14,10 +15,11 @@ class BaseService(ABC):
         return repr(self._record)
 
     def to_dict(self):
-        return self._record.model_dump(by_alias=True)
+        return clean_model_dump(self._record)
 
     def to_json(self):
-        return self._record.model_dump_json(by_alias=True)
+        import json
+        return json.dumps(clean_model_dump(self._record))
 
     def __getattr__(self, key):
         return getattr(self._record, key)

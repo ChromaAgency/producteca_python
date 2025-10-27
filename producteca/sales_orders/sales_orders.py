@@ -5,6 +5,7 @@ from producteca.abstract.abstract_dataclass import BaseService
 from producteca.sales_orders.search_sale_orders import SearchSalesOrderParams, SearchSalesOrder
 from producteca.payments.payments import Payment
 from producteca.shipments.shipment import Shipment
+from producteca.utils import clean_model_dump
 from dataclasses import dataclass
 import logging
 _logger = logging.getLogger(__name__)
@@ -327,8 +328,8 @@ class SaleOrderService(BaseService):
         endpoint = f'{self.endpoint}/synchronize'
         url = self.config.get_endpoint(endpoint)
         # TODO: Check what can we sync, and what can we not sync
-        sync_body = SaleOrderSynchronize(**self._record.model_dump(by_alias=True))
-        response = requests.post(url, json=sync_body.model_dump(by_alias=True), headers=self.config.headers)
+        sync_body = SaleOrderSynchronize(**clean_model_dump(self._record))
+        response = requests.post(url, json=clean_model_dump(sync_body), headers=self.config.headers)
         if not response.ok:
             raise Exception(f"Synchronize error {response.status_code} {response.text}")
         sync_res = SaleOrderSyncResponse(**response.json()) # noqa
@@ -341,7 +342,7 @@ class SaleOrderService(BaseService):
         url = self.config.get_endpoint(endpoint)
         response = requests.put(url, headers=self.config.headers,
                                 json={"id": self._record.id,
-                                      "invoiceIntegration": SaleOrderInvoiceIntegrationPut(**self._record.invoice_integration.model_dump(by_alias=True)).model_dump()})
+                                      "invoiceIntegration": clean_model_dump(SaleOrderInvoiceIntegrationPut(**clean_model_dump(self._record.invoice_integration)))})
         if not response.ok:
             raise Exception(f"Error on resposne {response.text}")
         return response.ok
@@ -365,7 +366,7 @@ class SaleOrderService(BaseService):
             raise Exception("You need to add a record id")
         payment = Payment(**payload)
         url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/payments")
-        res = requests.post(url, json=payment.model_dump(by_alias=True, exclude_none=True), headers=self.config.headers)
+        res = requests.post(url, json=clean_model_dump(payment), headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on resposne {res.text}")
         return Payment(**res.json())
@@ -375,7 +376,7 @@ class SaleOrderService(BaseService):
             raise Exception("You need to add a record id")
         payment = Payment(**payload)
         url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/payments/{payment_id}")
-        res = requests.put(url, json=payment.model_dump(by_alias=True, exclude_none=True), headers=self.config.headers)
+        res = requests.put(url, json=clean_model_dump(payment), headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on payment update {res.text}")
         return Payment(**res.json())
@@ -385,7 +386,7 @@ class SaleOrderService(BaseService):
             raise Exception("You need to add a record id")
         shipment = Shipment(**payload)
         url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/shipments")
-        res = requests.post(url, json=shipment.model_dump(by_alias=True, exclude_none=True), headers=self.config.headers)
+        res = requests.post(url, json=clean_model_dump(shipment), headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on shipment add {res.text}")
         return Shipment(**res.json())
@@ -395,7 +396,7 @@ class SaleOrderService(BaseService):
             raise Exception("You need to add a record id")
         shipment = Shipment(**payload)
         url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/shipments/{shipment_id}")
-        res = requests.put(url, json=shipment.model_dump(by_alias=True, exclude_none=True), headers=self.config.headers)
+        res = requests.put(url, json=clean_model_dump(shipment), headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on shipment update {res.text}")
         return Shipment(**res.json())
