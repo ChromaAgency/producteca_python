@@ -194,10 +194,10 @@ class SaleOrderShipment(BaseModel):
 
 
 class SaleOrderInvoiceIntegrationAbstract(BaseModel):
-    id: int
-    integration_id: str = Field(alias="integrationId")
-    app: int
-    created_at: str = Field(alias="createdAt")
+    id: Optional[int] = None
+    integration_id: Optional[str] = Field(None, alias="integrationId")
+    app: Optional[int] = None
+    created_at: Optional[str] = Field(None, alias="createdAt")
     decrease_stock: Optional[bool] = Field(None, alias="decreaseStock")
 
 
@@ -338,11 +338,16 @@ class SaleOrderService(BaseService):
     def invoice_integration(self):
         if not self._record:
             raise Exception("You need to add a record id")
+        if not self._record.invoice_integration:
+            raise Exception(f"Sale Order {self._record.id} does not have an invoiceIntegration")
         endpoint = f'{self.endpoint}/{self._record.id}/invoiceIntegration'
         url = self.config.get_endpoint(endpoint)
+        
+        invoice_integration_data = clean_model_dump(self._record.invoice_integration)
+        
         response = requests.put(url, headers=self.config.headers,
                                 json={"id": self._record.id,
-                                      "invoiceIntegration": clean_model_dump(SaleOrderInvoiceIntegrationPut(**clean_model_dump(self._record.invoice_integration)))})
+                                      "invoiceIntegration": invoice_integration_data})
         if not response.ok:
             raise Exception(f"Error on resposne {response.text}")
         return response.ok
