@@ -340,14 +340,22 @@ class SaleOrderService(BaseService):
             raise Exception("You need to add a record id")
         if not self._record.invoice_integration:
             raise Exception(f"Sale Order {self._record.id} does not have an invoiceIntegration")
-        endpoint = f'{self.endpoint}/{self._record.id}/invoiceIntegration'
-        url = self.config.get_endpoint(endpoint)
         
         invoice_integration_data = clean_model_dump(self._record.invoice_integration)
         
-        response = requests.put(url, headers=self.config.headers,
-                                json={"id": self._record.id,
-                                      "invoiceIntegration": invoice_integration_data})
+        if self._record.invoice_integration.id:
+            endpoint = f'{self.endpoint}/{self._record.id}/invoiceIntegration'
+            url = self.config.get_endpoint(endpoint)
+            response = requests.put(url, headers=self.config.headers,
+                                    json={"id": self._record.id,
+                                          "invoiceIntegration": invoice_integration_data})
+        else:
+            endpoint = f'{self.endpoint}/synchronize'
+            url = self.config.get_endpoint(endpoint)
+            response = requests.post(url, headers=self.config.headers,
+                                     json={"id": self._record.id,
+                                           "invoiceIntegration": invoice_integration_data})
+        
         if not response.ok:
             raise Exception(f"Error on resposne {response.text}")
         return response.ok
