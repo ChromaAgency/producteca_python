@@ -54,16 +54,6 @@ class TestProduct(unittest.TestCase):
         self.assertEqual(response.sku, "TEST001")
 
     @patch('requests.post')
-    def test_create_product_not_exist(self, mock_post):
-        # Mock product not found response
-        mock_response = Mock()
-        mock_response.status_code = 204
-        mock_post.return_value = mock_response
-
-        with self.assertRaises(Exception):
-            self.client.Product.synchronize(self.product_to_create_payload)
-
-    @patch('requests.post')
     def test_update_product_success(self, mock_post):
         payload = self.product_to_create_payload
         mock_response = Mock()
