@@ -48,15 +48,15 @@ class SalesOrderPaymentIntegration(BaseModel):
 class SalesOrderPayment(BaseModel):
     date: str
     amount: float
-    coupon_amount: float = Field(alias="couponAmount")
-    status: str
+    coupon_amount: Optional[float] = Field(default=None, alias="couponAmount")
+    status: Optional[str] = None
     method: str
     integration: Optional[SalesOrderPaymentIntegration] = None
-    transaction_fee: float = Field(alias="transactionFee")
-    installments: int
+    transaction_fee: Optional[float] = Field(default=None, alias="transactionFee")
+    installments: Optional[int] = None
     card: Optional[SalesOrderCard] = None
     notes: Optional[str] = None
-    has_cancelable_status: bool = Field(alias="hasCancelableStatus")
+    has_cancelable_status: Optional[bool] = Field(default=None, alias="hasCancelableStatus")
     id: int
 
 

@@ -20,14 +20,14 @@ class Payment(BaseModel):
     date: str
     amount: float
     couponAmount: Optional[float] = None
-    status: str
-    method: str
+    status: Optional[str] = None
+    method: Optional[str] = None
     integration: Optional[PaymentIntegration] = None
     transactionFee: Optional[float] = None
     installments: Optional[int] = None
     card: Optional[PaymentCard] = None
     notes: Optional[str] = None
-    hasCancelableStatus: bool
+    hasCancelableStatus: Optional[bool] = None
     id: Optional[int] = None
 
 
