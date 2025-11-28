@@ -263,6 +263,7 @@ class ProductService(BaseService):
         # Hacer model_dump con limpieza automática de valores vacíos
         data = clean_model_dump(product_variation)
         _logger.info(f"Synchronizing product: {data}")
+        _logger.info(f"POST {endpoint_url} - Headers: {headers} - Data: {data}")
         response = requests.post(endpoint_url, json=data, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting product {product_variation.sku} - {product_variation.code}\n {response.text}")
@@ -297,6 +298,7 @@ class ProductService(BaseService):
     def get(self, product_id: int) -> "ProductService":
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}')
         headers = self.config.headers
+        _logger.info(f"GET {endpoint_url} - Headers: {headers}")
         response = requests.get(endpoint_url, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting product {product_id}\n {response.text}")
@@ -306,6 +308,7 @@ class ProductService(BaseService):
     def get_bundle(self, product_id: int) -> BundleResponse:
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}/bundles')
         headers = self.config.headers
+        _logger.info(f"GET {endpoint_url} - Headers: {headers}")
         response = requests.get(endpoint_url, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting bundle {product_id}\n {response.text}")
@@ -314,6 +317,7 @@ class ProductService(BaseService):
     def get_ml_integration(self, product_id: int) -> MeliProduct:
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}/listingintegration')
         headers = self.config.headers
+        _logger.info(f"GET {endpoint_url} - Headers: {headers}")
         response = requests.get(endpoint_url, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting ml integration {product_id}\n {response.text}")
@@ -324,7 +328,9 @@ class ProductService(BaseService):
         endpoint: str = f'search/{self.endpoint}'
         headers = self.config.headers
         url = self.config.get_endpoint(endpoint)
-        response = requests.get(url, headers=headers, params=clean_model_dump(params))
+        params_dict = clean_model_dump(params)
+        _logger.info(f"GET {url} - Headers: {headers} - Params: {params_dict}")
+        response = requests.get(url, headers=headers, params=params_dict)
         if not response.ok:
             raise Exception(f"error in searching products {response.text}")
         return SearchProduct(**response.json())
