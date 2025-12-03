@@ -331,6 +331,7 @@ class ProductService(BaseService):
         params_dict = clean_model_dump(params)
         _logger.info(f"GET {url} - Headers: {headers} - Params: {params_dict}")
         response = requests.get(url, headers=headers, params=params_dict)
+        _logger.info(f"Response status: {response.status_code} - Response text: {response.text}")
         if not response.ok:
             raise Exception(f"error in searching products {response.text}")
         return SearchProduct(**response.json())
