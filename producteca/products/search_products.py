@@ -96,7 +96,7 @@ class SearchResultItem(BaseModel):
     mandatory_free_shipping: Optional[bool] = Field(None, alias='mandatoryFreeShipping')
     free_shipping: Optional[bool] = Field(None, alias='freeShipping')
     free_shipping_cost: Optional[float] = Field(None, alias='freeShippingCost')
-    template: Optional[str] = None
+    template: Optional[int] = None
     youtube_id: Optional[str] = Field(None, alias='youtubeId')
     warranty: Optional[str] = None
     permalink: Optional[str] = None
