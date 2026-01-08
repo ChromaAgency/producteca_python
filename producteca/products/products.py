@@ -113,6 +113,7 @@ class BundleResponse(BaseModel):
 
 
 class Product(BaseModel):
+    updatable_properties: Optional[List[str]] = Field(default=None, alias='updatableProperties')
     integrations: Optional[Union[List[Integration], List]] = None
     variations: Optional[Union[List[Variation], List]] = None
     is_simple: Optional[bool] = Field(default=None, alias='isSimple')
