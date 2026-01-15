@@ -115,7 +115,7 @@ class SalesOrderResultItem(BaseModel):
     payment_term: str = Field(alias="paymentTerm")
     product_names: List[str] = Field(alias="productNames")
     reserving_product_ids: Union[str, List[str]] = Field(alias="reservingProductIds")
-    sales_channel: int = Field(alias="salesChannel")
+    sales_channel: Optional[int] = Field(default=None, alias="salesChannel")
     shipments: Optional[List[SalesOrderShipment]] = None
     tracking_number: Optional[str] = Field(alias="trackingNumber")
     skus: List[str]
