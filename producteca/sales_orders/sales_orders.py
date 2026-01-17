@@ -288,7 +288,6 @@ class SaleOrderService(BaseService):
     def get(self, sale_order_id: int) -> "SaleOrderService":
         endpoint = f'{self.endpoint}/{sale_order_id}'
         url = self.config.get_endpoint(endpoint)
-        _logger.info(f"GET {url} - Headers: {self.config.headers}")
         response = requests.get(url, headers=self.config.headers)
         if not response.ok:
             raise Exception(f"Order {sale_order_id} could not be fetched. Error {response.status_code} {response.text}")
@@ -300,7 +299,6 @@ class SaleOrderService(BaseService):
             raise Exception("You need to add a record id")
         endpoint = f'{self.endpoint}/{self._record.id}/labels'
         url = self.config.get_endpoint(endpoint)
-        _logger.info(f"GET {url} - Headers: {self.config.headers}")
         response = requests.get(url, headers=self.config.headers)
         if not response.ok:
             raise Exception("labels could not be gotten")
@@ -311,7 +309,6 @@ class SaleOrderService(BaseService):
             raise Exception("You need to add a record id")
         endpoint = f'{self.endpoint}/{self._record.id}/close'
         url = self.config.get_endpoint(endpoint)
-        _logger.info(f"POST {url} - Headers: {self.config.headers}")
         response = requests.post(url, headers=self.config.headers)
         if not response.ok:
             raise Exception("Order could not be closed")
@@ -321,7 +318,6 @@ class SaleOrderService(BaseService):
             raise Exception("You need to add a record id")
         endpoint = f'{self.endpoint}/{self._record.id}/cancel'
         url = self.config.get_endpoint(endpoint)
-        _logger.info(f"POST {url} - Headers: {self.config.headers}")
         response = requests.post(url, headers=self.config.headers)
         if not response.ok:
             raise Exception("Order could not be cancelled")
@@ -370,7 +366,6 @@ class SaleOrderService(BaseService):
         headers = self.config.headers
         url = self.config.get_endpoint(endpoint)
         new_url = f"{url}?$filter={params.filter}&top={params.top}&skip={params.skip}"
-        _logger.info(f"GET {new_url} - Headers: {headers}")
         response = requests.get(
             new_url,
             headers=headers,
@@ -386,7 +381,6 @@ class SaleOrderService(BaseService):
         payment = Payment(**payload)
         url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/payments")
         payment_data = clean_model_dump(payment)
-        _logger.info(f"POST {url} - Headers: {self.config.headers} - Data: {payment_data}")
         res = requests.post(url, json=payment_data, headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on resposne {res.text}")
@@ -398,7 +392,6 @@ class SaleOrderService(BaseService):
         payment = Payment(**payload)
         url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/payments/{payment_id}")
         payment_data = clean_model_dump(payment)
-        _logger.info(f"PUT {url} - Headers: {self.config.headers} - Data: {payment_data}")
         res = requests.put(url, json=payment_data, headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on payment update {res.text}")
@@ -410,7 +403,6 @@ class SaleOrderService(BaseService):
         shipment = Shipment(**payload)
         url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/shipments")
         shipment_data = clean_model_dump(shipment)
-        _logger.info(f"POST {url} - Headers: {self.config.headers} - Data: {shipment_data}")
         res = requests.post(url, json=shipment_data, headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on shipment add {res.text}")
@@ -422,7 +414,6 @@ class SaleOrderService(BaseService):
         shipment = Shipment(**payload)
         url = self.config.get_endpoint(f"{self.endpoint}/{self._record.id}/shipments/{shipment_id}")
         shipment_data = clean_model_dump(shipment)
-        _logger.info(f"PUT {url} - Headers: {self.config.headers} - Data: {shipment_data}")
         res = requests.put(url, json=shipment_data, headers=self.config.headers)
         if not res.ok:
             raise Exception(f"Error on shipment update {res.text}")

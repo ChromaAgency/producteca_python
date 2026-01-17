@@ -299,7 +299,6 @@ class ProductService(BaseService):
     def get(self, product_id: int) -> "ProductService":
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}')
         headers = self.config.headers
-        _logger.info(f"GET {endpoint_url} - Headers: {headers}")
         response = requests.get(endpoint_url, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting product {product_id}\n {response.text}")
@@ -309,7 +308,6 @@ class ProductService(BaseService):
     def get_bundle(self, product_id: int) -> BundleResponse:
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}/bundles')
         headers = self.config.headers
-        _logger.info(f"GET {endpoint_url} - Headers: {headers}")
         response = requests.get(endpoint_url, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting bundle {product_id}\n {response.text}")
@@ -318,7 +316,6 @@ class ProductService(BaseService):
     def get_ml_integration(self, product_id: int) -> MeliProduct:
         endpoint_url = self.config.get_endpoint(f'{self.endpoint}/{product_id}/listingintegration')
         headers = self.config.headers
-        _logger.info(f"GET {endpoint_url} - Headers: {headers}")
         response = requests.get(endpoint_url, headers=headers)
         if not response.ok:
             raise Exception(f"Error getting ml integration {product_id}\n {response.text}")
