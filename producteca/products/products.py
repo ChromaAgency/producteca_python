@@ -150,6 +150,7 @@ class ProductVariationBase(BaseModel):
     stocks: Optional[Union[List[Stock], List]] = []
     prices: Optional[Union[List[Price], List]] = []
     pictures: Optional[Union[List[Picture], List]] = []
+    updatable_properties: Optional[List[str]] = Field(default=None, alias='$updatableProperties')
 
 
 class ProductVariation(ProductVariationBase):
