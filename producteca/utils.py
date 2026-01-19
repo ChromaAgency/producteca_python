@@ -9,14 +9,14 @@ def exclude_empty_values(obj: Any) -> Any:
     """Recursively remove None, empty lists, empty strings, and empty dicts
     
     Note: Preserves 0 values for numeric fields as they are valid prices/quantities
-    Special case: Preserves empty list [] for 'updatableProperties' to allow explicit updates
+    Special case: Preserves empty list [] for '$updatableProperties' to allow explicit updates
     """
     if isinstance(obj, dict):
         filtered_dict = {}
         for k, v in obj.items():
             # Special case: preserve empty list for updatableProperties
             # This allows explicitly sending [] to clear/update the field
-            if k == 'updatableProperties' and v == []:
+            if k == '$updatableProperties' and v == []:
                 filtered_dict[k] = v
                 continue
             
