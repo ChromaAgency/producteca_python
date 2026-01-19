@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "producteca"
-version = "2.1.2"
+version = "2.1.3"
 description = ""
 authors = ["Chroma Agency, Matias Rivera <mrivera@chroma.agency>"]
 readme = "README.md"
